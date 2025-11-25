@@ -1,53 +1,57 @@
 import { entityProfiles } from './entityProfiles';
 
-// Competitor movies database with dummy data based on entity profiles
-export const competitorMoviesDB = [
-  { 
-    id: 'dedepyaarde2',
-    name: 'De De Pyaar De 2', 
-    sentiment: 72, 
-    sentimentLabel: 'Positive',
-    totalMentions: 1920,
-    platforms: { reddit: 960, youtube: 576, twitter: 384 },
-    sentimentBreakdown: { positive: 72, neutral: 18, negative: 10 }
-  },
-  { 
-    id: 'homebound',
-    name: 'Homebound', 
-    sentiment: 58, 
-    sentimentLabel: 'Neutral',
-    totalMentions: 950,
-    platforms: { reddit: 380, youtube: 285, twitter: 285 },
-    sentimentBreakdown: { positive: 58, neutral: 28, negative: 14 }
-  },
-  { 
-    id: 'bengalfiles',
-    name: 'The Bengal Files', 
-    sentiment: 76, 
-    sentimentLabel: 'Positive',
-    totalMentions: 1680,
-    platforms: { reddit: 840, youtube: 504, twitter: 336 },
-    sentimentBreakdown: { positive: 76, neutral: 16, negative: 8 }
-  },
-  { 
-    id: 'jollyllb3',
-    name: 'Jolly LLB 3', 
-    sentiment: 65, 
-    sentimentLabel: 'Positive',
-    totalMentions: 1450,
-    platforms: { reddit: 580, youtube: 520, twitter: 350 },
-    sentimentBreakdown: { positive: 65, neutral: 25, negative: 10 }
-  },
-  { 
-    id: 'baramulla',
-    name: 'Baramulla', 
-    sentiment: 62, 
-    sentimentLabel: 'Positive',
-    totalMentions: 1240,
-    platforms: { reddit: 620, youtube: 372, twitter: 248 },
-    sentimentBreakdown: { positive: 62, neutral: 24, negative: 14 }
-  }
-];
+// Competitor movies database with data dynamically calculated from entity profiles
+const movieIds = ['dedepyaarde2', 'homebound', 'bengalfiles', 'jollyllb3', 'baramulla'];
+const movieNames = {
+  dedepyaarde2: 'De De Pyaar De 2',
+  homebound: 'Homebound',
+  bengalfiles: 'The Bengal Files',
+  jollyllb3: 'Jolly LLB 3',
+  baramulla: 'Baramulla'
+};
+
+// Generate competitor data based on entity profiles
+const generateCompetitorMoviesDB = () => {
+  return movieIds.map(id => {
+    const profile = entityProfiles[id];
+    
+    // Calculate sentiment breakdown percentages from weights
+    const positive = Math.round(profile.sentimentWeights.positive * 100);
+    const neutral = Math.round(profile.sentimentWeights.neutral * 100);
+    const negative = Math.round(profile.sentimentWeights.negative * 100);
+    
+    // Calculate overall sentiment score
+    const sentimentScore = Math.round(
+      (positive * 1) + (neutral * 0.5) - (negative * 0.8)
+    );
+    
+    // Determine sentiment label based on score
+    let sentimentLabel;
+    if (sentimentScore >= 70) sentimentLabel = 'Positive';
+    else if (sentimentScore >= 40) sentimentLabel = 'Neutral';
+    else sentimentLabel = 'Negative';
+    
+    // Calculate mentions based on mention count from profile
+    const totalMentions = profile.mentionCount * 1.2;
+    
+    // Calculate platform breakdown based on profile weights
+    const redditMentions = Math.round(totalMentions * profile.platforms.reddit);
+    const youtubeMentions = Math.round(totalMentions * profile.platforms.youtube);
+    const twitterMentions = Math.round(totalMentions * profile.platforms.twitter);
+    
+    return {
+      id,
+      name: movieNames[id],
+      sentiment: sentimentScore,
+      sentimentLabel,
+      totalMentions: Math.round(totalMentions),
+      platforms: { reddit: redditMentions, youtube: youtubeMentions, twitter: twitterMentions },
+      sentimentBreakdown: { positive, neutral, negative }
+    };
+  });
+};
+
+export const competitorMoviesDB = generateCompetitorMoviesDB();
 
 export const generateCompetitiveData = () => {
   const competitors = [
