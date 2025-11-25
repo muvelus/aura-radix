@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Target, Plus, X, TrendingUp, MessageSquare, Search } from 'lucide-react';
 import { competitorMoviesDB } from '../../dummydata';
 
-export default function CompetitivePositioning({ competitiveData }) {
-  const [competitors, setCompetitors] = useState([]);
+export default function CompetitivePositioning({ competitiveData, competitors, setCompetitors }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [filteredMovies, setFilteredMovies] = useState([]);

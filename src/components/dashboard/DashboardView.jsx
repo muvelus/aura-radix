@@ -1,68 +1,170 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { celebrityAnalytics } from '../../dummydata';
+import { celebrityAnalytics, movies } from '../../dummydata';
 import CelebrityAnalytics from './CelebrityAnalytics';
-import GenreTrends from './GenreTrends';
-import TrendingNarratives from './TrendingNarratives';
 import CompetitivePositioning from './CompetitivePositioning';
+import SocialMediaFeed from './SocialMediaFeed';
+import KPICardsSection from '../analytics/KPICardsSection';
+import SentimentTrendChart from '../analytics/SentimentTrendChart';
+import SentimentDistributionChart from '../analytics/SentimentDistributionChart';
+import PlatformBreakdownChart from '../analytics/PlatformBreakdownChart';
 
-export default function DashboardView({ selectedEntity, entityType, competitiveData, mentions }) {
+export default function DashboardView({ 
+  selectedEntity, 
+  entityType, 
+  competitiveData, 
+  mentions,
+  competitors,
+  setCompetitors,
+  dateRange,
+  setDateRange
+}) {
   // Determine if we're showing celebrity or movie data
   const isCelebrity = entityType === 'celebrity';
 
-  // Extract trending narratives from mentions
-  const trendingNarratives = useMemo(() => {
-    if (!mentions?.length) return [];
+  const dateRangeOptions = [
+    { value: '7days', label: 'Last 7 Days', days: 7 },
+    { value: '2weeks', label: 'Last 2 Weeks', days: 14 },
+    { value: '4weeks', label: 'Last 4 Weeks', days: 28 },
+    { value: '2months', label: 'Last 2 Months', days: 60 }
+  ];
+  
+  const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange) || dateRangeOptions[0];
 
-    // Count mentions by narrative
-    const narrativeCounts = {};
-    const narrativeSentiments = {};
+  // Calculate key analytics metrics
+  const analytics = useMemo(() => {
+    if (!mentions || mentions.length === 0) {
+      return {
+        totalMentions: 0,
+        positive: 0,
+        negative: 0,
+        neutral: 0,
+        highThreat: 0,
+        avgEngagement: 0,
+        timeBuckets: [],
+        topNarratives: [],
+        sentimentData: [],
+        platformData: []
+      };
+    }
 
-    mentions.forEach(mention => {
-      const narrative = mention.narrative;
-      if (!narrativeCounts[narrative]) {
-        narrativeCounts[narrative] = 0;
-        narrativeSentiments[narrative] = { positive: 0, negative: 0, neutral: 0 };
+    // Filter mentions based on date range
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - selectedRange.days);
+    
+    const filteredMentions = mentions.filter(m => m.timestamp >= cutoffDate);
+    
+    const totalMentions = filteredMentions.length;
+    const positive = filteredMentions.filter(m => m.aiSentiment === 'positive').length;
+    const negative = filteredMentions.filter(m => m.aiSentiment === 'negative').length;
+    const neutral = filteredMentions.filter(m => m.aiSentiment === 'neutral').length;
+    const highThreat = filteredMentions.filter(m => m.aiThreatScore >= 70).length;
+    
+    // Calculate engagement
+    const totalEngagement = filteredMentions.reduce((sum, m) => 
+      sum + (m.engagement?.likes || 0) + (m.engagement?.comments || 0), 0
+    );
+    const avgEngagement = totalMentions > 0 ? Math.round(totalEngagement / totalMentions) : 0;
+    
+    // Platform breakdown
+    const platformStats = filteredMentions.reduce((acc, m) => {
+      acc[m.platform] = (acc[m.platform] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Sentiment over time - dynamic buckets based on date range
+    const now = Date.now();
+    const bucketCount = selectedRange.days <= 7 ? 7 : selectedRange.days <= 14 ? 14 : selectedRange.days <= 28 ? 28 : Math.ceil(selectedRange.days / 2);
+    const bucketSizeMs = (selectedRange.days * 24 * 60 * 60 * 1000) / bucketCount;
+    
+    // Calculate time buckets from actual mentions data
+    const timeBuckets = Array.from({ length: bucketCount }, (_, i) => {
+      const bucketEnd = now - (i * bucketSizeMs);
+      const bucketStart = bucketEnd - bucketSizeMs;
+      
+      const bucketMentions = filteredMentions.filter(m => {
+        const time = new Date(m.timestamp).getTime();
+        return time >= bucketStart && time < bucketEnd;
+      });
+      
+      let timeLabel;
+      if (selectedRange.days <= 7) {
+        timeLabel = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(bucketEnd).getDay()];
+      } else if (selectedRange.days <= 14) {
+        timeLabel = new Date(bucketEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else {
+        timeLabel = new Date(bucketEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
-      narrativeCounts[narrative]++;
-      narrativeSentiments[narrative][mention.aiSentiment]++;
-    });
+      
+      const positiveCount = bucketMentions.filter(m => m.aiSentiment === 'positive').length;
+      const neutralCount = bucketMentions.filter(m => m.aiSentiment === 'neutral').length;
+      const negativeCount = bucketMentions.filter(m => m.aiSentiment === 'negative').length;
+      const total = bucketMentions.length;
+      
+      const positiveVal = total > 0 ? Math.round((positiveCount / total) * 100) : 0;
+      const neutralVal = total > 0 ? Math.round((neutralCount / total) * 100) : 0;
+      const negativeVal = total > 0 ? Math.round((negativeCount / total) * 100) : 0;
+      
+      const fullDate = new Date(bucketEnd).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
 
-    // Convert to array and sort by count
-    const narratives = Object.entries(narrativeCounts)
-      .map(([narrative, count]) => {
-        const sentiments = narrativeSentiments[narrative];
-        const total = count;
-        const positivePercent = Math.round((sentiments.positive / total) * 100);
-        const negativePercent = Math.round((sentiments.negative / total) * 100);
-        const neutralPercent = Math.round((sentiments.neutral / total) * 100);
-        
-        // Simulate growth trend (positive if more positive than negative)
-        const growth = positivePercent > negativePercent ? 
-          Math.floor(Math.random() * 15) + 5 : 
-          -(Math.floor(Math.random() * 10) + 3);
-
-        return {
-          narrative,
-          count,
-          positivePercent,
-          negativePercent,
-          neutralPercent,
-          growth,
-          trend: growth > 5 ? 'up' : growth < -3 ? 'down' : 'stable'
-        };
-      })
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
-
-    return narratives;
-  }, [mentions]);
-
-  // Format currency helper
-  const formatCurrency = (value) => {
-    const crores = value / 10000000;
-    return `₹${crores.toFixed(0)} Cr`;
-  };
+      const bucketEndDateUTC = new Date(bucketEnd);
+      bucketEndDateUTC.setUTCHours(0, 0, 0, 0);
+      const bucketDateMs = bucketEndDateUTC.getTime();
+      
+      return {
+        time: timeLabel,
+        positive: positiveVal,
+        neutral: neutralVal,
+        negative: negativeVal,
+        total,
+        fullDate,
+        bucketDateMs
+      };
+    }).reverse();
+    
+    // Sentiment distribution for pie chart
+    const sentimentData = [
+      { name: 'Positive', value: positive, color: '#22c55e', percentage: totalMentions > 0 ? ((positive / totalMentions) * 100).toFixed(1) : 0 },
+      { name: 'Neutral', value: neutral, color: '#eab308', percentage: totalMentions > 0 ? ((neutral / totalMentions) * 100).toFixed(1) : 0 },
+      { name: 'Negative', value: negative, color: '#ef4444', percentage: totalMentions > 0 ? ((negative / totalMentions) * 100).toFixed(1) : 0 }
+    ];
+    
+    // Platform distribution
+    const platformData = [
+      { platform: 'Reddit', count: platformStats.reddit || 0, color: '#FF4500' },
+      { platform: 'Instagram', count: platformStats.youtube || 0, color: '#E1306C' },
+      { platform: 'X', count: platformStats.twitter || 0, color: '#000000' }
+    ];
+    
+    return {
+      totalMentions,
+      positive,
+      negative,
+      neutral,
+      highThreat,
+      avgEngagement,
+      timeBuckets,
+      sentimentData,
+      platformData
+    };
+  }, [mentions, selectedRange, selectedEntity?.id]);
+  
+  const sentimentScore = useMemo(() => {
+    if (analytics.totalMentions === 0) return { score: 50, label: 'Neutral', color: '#eab308' };
+    
+    const score = Math.round(
+      ((analytics.positive * 100) + (analytics.neutral * 50)) / analytics.totalMentions
+    );
+    
+    if (score >= 70) return { score, label: 'Positive', color: '#22c55e' };
+    if (score >= 40) return { score, label: 'Mixed', color: '#eab308' };
+    return { score, label: 'Negative', color: '#ef4444' };
+  }, [analytics]);
 
   // Get celebrity analytics for selected entity (celebrities)
   const celebrityData = isCelebrity && selectedEntity?.id && celebrityAnalytics[selectedEntity.id]
@@ -85,34 +187,13 @@ export default function DashboardView({ selectedEntity, entityType, competitiveD
         ]
       };
 
-  // Genre Trends Data
-  const genreTrends = [
-    { genre: 'Action', sentiment: 92, buzz: 3200, trend: 15, color: '#ef4444' },
-    { genre: 'Drama', sentiment: 58, buzz: 1400, trend: -8, color: '#f59e0b' },
-    { genre: 'Comedy', sentiment: 45, buzz: 980, trend: -12, color: '#10b981' },
-    { genre: 'Thriller', sentiment: 76, buzz: 2600, trend: 22, color: '#8b5cf6' },
-    { genre: 'Romance', sentiment: 38, buzz: 720, trend: -18, color: '#ec4899' },
-    { genre: 'Sci-Fi', sentiment: 88, buzz: 3800, trend: 28, color: '#3b82f6' }
-  ];
-
-  // Weekly trend data for chart
-  const weeklyTrends = [
-    { day: 'Mon', action: 78, thriller: 68, scifi: 82 },
-    { day: 'Tue', action: 82, thriller: 72, scifi: 85 },
-    { day: 'Wed', action: 85, thriller: 75, scifi: 87 },
-    { day: 'Thu', action: 88, thriller: 78, scifi: 89 },
-    { day: 'Fri', action: 91, thriller: 82, scifi: 91 },
-    { day: 'Sat', action: 89, thriller: 80, scifi: 88 },
-    { day: 'Sun', action: 92, thriller: 76, scifi: 88 }
-  ];
-
   return (
     <div className="h-full overflow-y-auto bg-background">
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">AI Analytics Dashboard</h2>
+            <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary rounded-lg">
             <Sparkles className="w-4 h-4 text-primary" />
@@ -120,16 +201,59 @@ export default function DashboardView({ selectedEntity, entityType, competitiveD
           </div>
         </div>
 
-        {/* Genre Trends Section */}
-        <GenreTrends genreTrends={genreTrends} weeklyTrends={weeklyTrends} />
+        {/* Date Range Selector for Sentiment Analysis */}
+        <div className="flex items-center gap-2 bg-card border border-border rounded-lg p-3 w-fit">
+          <span className="text-xs font-medium text-muted-foreground">Time Range:</span>
+          <div className="flex gap-2">
+            {dateRangeOptions.map(option => (
+              <button
+                key={option.value}
+                onClick={() => setDateRange(option.value)}
+                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                  dateRange === option.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-accent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* Trending Narratives Section */}
-        {/* {mentions && mentions.length > 0 && (
-          <TrendingNarratives trendingNarratives={trendingNarratives} />
-        )} */}
+        {/* KPI Cards */}
+        <KPICardsSection 
+          analytics={analytics}
+          sentimentScore={sentimentScore}
+        />
 
-        {/* Competitive Positioning */}
-        <CompetitivePositioning competitiveData={competitiveData} />
+        {/* Sentiment Trend Chart - Full Width */}
+        <SentimentTrendChart 
+          timeBuckets={analytics.timeBuckets} 
+          releaseDate={movies.find(m => m.id === selectedEntity?.id)?.releaseDate}
+          selectedEntity={selectedEntity}
+        />
+
+        {/* Sentiment Distribution and Platform Breakdown - Side by Side */}
+        <div className="grid grid-cols-2 gap-6">
+          <SentimentDistributionChart sentimentData={analytics.sentimentData} />
+          <PlatformBreakdownChart platformData={analytics.platformData} />
+        </div>
+
+        {/* Social Media Feed - Full Width */}
+        <SocialMediaFeed mentions={mentions} selectedEntity={selectedEntity} />
+
+        {/* Competitor Snapshot */}
+        <CompetitivePositioning 
+          competitiveData={competitiveData}
+          competitors={competitors}
+          setCompetitors={setCompetitors}
+        />
+
+        {/* Celebrity Analytics if applicable */}
+        {isCelebrity && (
+          <CelebrityAnalytics celebrityData={celebrityData} />
+        )}
       </div>
     </div>
   );

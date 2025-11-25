@@ -3,7 +3,7 @@ import { LayoutDashboard, BarChart3, AlertTriangle, ChevronDown, ChevronRight } 
 
 export default function LeftNavbar({ activeTab, onTabChange }) {
   const [crisisExpanded, setCrisisExpanded] = useState(true);
-  const [analyticsExpanded, setAnalyticsExpanded] = useState(true);
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
   
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,11 +12,7 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
       label: 'Analytics', 
       icon: BarChart3,
       subTabs: [
-        { id: 'box-office', label: 'Box Office Prediction', disabled: true },
-        { id: 'hit-genre', label: 'Hit Genre Prediction', disabled: true },
-        { id: 'sentiment-analysis', label: 'Sentiment Analysis' },
-        { id: 'trending-genre', label: 'Trending Genre Analysis' },
-        { id: 'historical-data', label: 'Historical Data Analysis' }
+        { id: 'sentiment-analysis', label: 'Detailed Sentiment Analysis' }
       ]
     },
     { 
@@ -25,7 +21,6 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
       icon: AlertTriangle,
       subTabs: [
         { id: 'crisis-center', label: 'Crisis Management Center' },
-        // { id: 'metrics', label: 'Metrics Dashboard' },
         { id: 'negative-analysis', label: 'Negative Sentiment Analysis' }
       ]
     }

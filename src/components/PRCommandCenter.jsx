@@ -27,6 +27,8 @@ export default function PRCommandCenter() {
   const [selectedStatuses, setSelectedStatuses] = useState([]); // Empty = all statuses
   const [commandOpen, setCommandOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('60m'); // '60m', '24h', '7d', '30d', '6m', '1y'
+  const [competitors, setCompetitors] = useState([]); // Competitors state lifted to parent
+  const [dateRange, setDateRange] = useState('7days'); // Analytics date range
 
   // Simulated real-time data fetching based on selected entity
   const { data: mentions = [], refetch: refetchMentions } = useQuery({
@@ -145,6 +147,10 @@ export default function PRCommandCenter() {
           entityType={entityType}
           competitiveData={competitiveData}
           mentions={filteredMentions}
+          competitors={competitors}
+          setCompetitors={setCompetitors}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
         />
       )}
 
