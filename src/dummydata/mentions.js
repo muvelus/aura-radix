@@ -1,5 +1,6 @@
 import { entityProfiles } from './entityProfiles';
 import { movies } from './movies';
+import { movieRealCommentsMap } from './realComments';
 
 // Sample text content for different sentiments
 const sampleTexts = {
@@ -104,6 +105,10 @@ const authors = [
 export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
   const profile = entityProfiles[entityId] || entityProfiles.dedepyaarde2;
   
+  // Get real comments if available for this entity
+  const realCommentsList = movieRealCommentsMap[entityId] || [];
+  const hasRealComments = realCommentsList.length > 0;
+  
   // Use mention count from profile if available, otherwise use passed count
   const mentionCount = profile.mentionCount || count;
   const platforms = ['reddit', 'youtube', 'twitter'];
@@ -111,16 +116,32 @@ export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
   const narratives = profile.narratives;
   
   return Array.from({ length: mentionCount }, (_, i) => {
-    // Use weighted random selection for sentiment based on entity profile
-    const rand = Math.random();
-    let cumulative = 0;
-    let sentiment = 'neutral';
-    for (const [sent, weight] of Object.entries(profile.sentimentWeights)) {
-      cumulative += weight;
-      if (rand <= cumulative) {
-        sentiment = sent;
-        break;
+    let sentiment, author, text, narrativeUsed;
+    
+    // Use real comments when available and rotating through them
+    if (hasRealComments && i < realCommentsList.length) {
+      const realComment = realCommentsList[i];
+      text = realComment.text;
+      author = realComment.author;
+      sentiment = realComment.sentiment;
+      narrativeUsed = realComment.narrative;
+    } else {
+      // Use weighted random selection for sentiment based on entity profile
+      const rand = Math.random();
+      let cumulative = 0;
+      sentiment = 'neutral';
+      for (const [sent, weight] of Object.entries(profile.sentimentWeights)) {
+        cumulative += weight;
+        if (rand <= cumulative) {
+          sentiment = sent;
+          break;
+        }
       }
+      
+      narrativeUsed = narratives[Math.floor(Math.random() * narratives.length)];
+      author = authors[Math.floor(Math.random() * authors.length)];
+      const texts = sampleTexts[sentiment];
+      text = texts[Math.floor(Math.random() * texts.length)];
     }
     
     // Use weighted platform selection
@@ -134,11 +155,6 @@ export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
         break;
       }
     }
-    
-    const narrative = narratives[Math.floor(Math.random() * narratives.length)];
-    const author = authors[Math.floor(Math.random() * authors.length)];
-    const texts = sampleTexts[sentiment];
-    const text = texts[Math.floor(Math.random() * texts.length)];
     
     // Generate timestamps spread across the last 60 days for better distribution
     const timestamp = new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000);
@@ -171,11 +187,13 @@ export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
       authorId: `${author.toLowerCase()}_${Math.floor(Math.random() * 10000)}`,
       timestamp,
       textSnippet: text,
+      text: text,
       sourceUrl,
       aiSentiment: sentiment,
       aiThreatScore: Math.round(threatScore),
-      narrative,
+      narrative: narrativeUsed,
       isAnomaly,
+      isRealComment: hasRealComments && i < realCommentsList.length,
       engagement: {
         likes: adjustedEngagement,
         comments: Math.floor(adjustedEngagement * 0.1),
@@ -188,5 +206,11 @@ export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
         followerCount: Math.floor(Math.random() * 100000)
       }
     };
-  }).sort((a, b) => b.timestamp - a.timestamp);
+  }).sort((a, b) => {
+    // Real comments always come first
+    if (a.isRealComment && !b.isRealComment) return -1;
+    if (!a.isRealComment && b.isRealComment) return 1;
+    // Then sort by timestamp (newest first)
+    return b.timestamp - a.timestamp;
+  });
 };

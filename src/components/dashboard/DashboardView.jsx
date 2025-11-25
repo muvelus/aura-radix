@@ -237,11 +237,8 @@ export default function DashboardView({
         {/* Sentiment Distribution and Platform Breakdown - Side by Side */}
         <div className="grid grid-cols-2 gap-6">
           <SentimentDistributionChart sentimentData={analytics.sentimentData} />
-          <PlatformBreakdownChart platformData={analytics.platformData} />
+          <PlatformBreakdownChart mentions={mentions} />
         </div>
-
-        {/* Social Media Feed - Full Width */}
-        <SocialMediaFeed mentions={mentions} selectedEntity={selectedEntity} />
 
         {/* Competitor Snapshot */}
         <CompetitivePositioning 
@@ -249,6 +246,11 @@ export default function DashboardView({
           competitors={competitors}
           setCompetitors={setCompetitors}
         />
+
+        {/* Social Media Feed - Full Width */}
+        <SocialMediaFeed mentions={mentions} selectedEntity={selectedEntity} />
+
+
 
         {/* Celebrity Analytics if applicable */}
         {isCelebrity && (

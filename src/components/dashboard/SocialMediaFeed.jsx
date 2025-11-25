@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MessageSquare, Heart, MessageCircle, Share2, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Heart, MessageCircle, Share2, AlertTriangle, Star } from 'lucide-react';
 
 export default function SocialMediaFeed({ mentions, selectedEntity }) {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
@@ -111,7 +111,15 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
                     {mention.author?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{mention.author || 'Anonymous'}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{mention.author || 'Anonymous'}</p>
+                      {/* Star indicator for real vs generated comments */}
+                      {mention.isRealComment ? (
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" title="Real comment from social media" />
+                      ) : (
+                        <Star className="w-4 h-4 fill-red-300 text-red-300" title="Auto-generated comment" />
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {mention.platform === 'youtube' ? 'Instagram' : mention.platform === 'twitter' ? 'X' : mention.platform}
                     </p>
@@ -175,6 +183,18 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
             <p className="text-sm">No posts found for this platform</p>
           </div>
         )}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-center gap-6 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+          <span>Real comment from social media</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Star className="w-3.5 h-3.5 fill-red-300 text-red-300" />
+          <span>Auto-generated comment</span>
+        </div>
       </div>
     </div>
   );
