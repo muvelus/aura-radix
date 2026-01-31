@@ -34,10 +34,9 @@ export const generateNegativeMentions = (count = 50) => {
   ];
 
   const authors = [
-    'CriticalViewer', 'FilmSkeptic', 'RealisticExpectations', 'BoxOfficeAnalyst',
-    'CinematicVoice', 'TruthTeller', 'HonestReview', 'ScreenSense',
-    'DirectiveThoughts', 'MovieRealist', 'CandidOpinion', 'FrankFeedback',
-    'PracticalCritic', 'DetailedAnalysis', 'ProperContext', 'RealTalk'
+    'amethystgems', 'aquamarineskies', 'arcticwhispers', 'autumnleavesfalling',
+    'azurehorizons', 'beautifulnightsky', 'beeswaxcandles', 'blackpearl',
+    'starryeyed_dreamer98', 'aesthetic__girl', 'flowerchild1999', 'hippiechick2468'
   ];
 
   const platforms = ['reddit', 'youtube', 'twitter'];
@@ -96,8 +95,9 @@ export const generateCrisisData = (movieEntityId = 'dedepyaarde2') => {
   ];
 
   const authors = [
-    'MovieBuff2024', 'CinematicCritic', 'FilmFanatic99', 'RedditUser123',
-    'InstagramUser', 'XUser', 'PopcornLover', 'BlockbusterFan'
+    'amethystgems', 'aquamarineskies', 'arcticwhispers', 'autumnleavesfalling',
+    'azurehorizons', 'beautifulnightsky', 'beeswaxcandles', 'blackpearl',
+    'starryeyed_dreamer98', 'aesthetic__girl', 'flowerchild1999', 'hippiechick2468'
   ];
 
   const platforms = ['reddit', 'youtube', 'twitter'];

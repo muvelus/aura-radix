@@ -81,11 +81,11 @@ export const generateMetricsData = (timeRange = '60m') => {
 
 export const threadGenealogyData = {
   nodes: [
-    { id: '1', type: 'original', text: 'Just saw the trailer...', author: 'User1' },
-    { id: '2', type: 'reply', text: 'I agree!', author: 'User2', parent: '1' },
-    { id: '3', type: 'reply', text: 'Disagree completely', author: 'User3', parent: '1' },
-    { id: '4', type: 'reply', text: 'Why?', author: 'User4', parent: '3' },
-    { id: '5', type: 'reply', text: 'Because...', author: 'User3', parent: '4' }
+    { id: '1', type: 'original', text: 'Just saw the trailer...', author: 'amethystgems' },
+    { id: '2', type: 'reply', text: 'I agree!', author: 'aquamarineskies', parent: '1' },
+    { id: '3', type: 'reply', text: 'Disagree completely', author: 'arcticwhispers', parent: '1' },
+    { id: '4', type: 'reply', text: 'Why?', author: 'autumnleavesfalling', parent: '3' },
+    { id: '5', type: 'reply', text: 'Because...', author: 'arcticwhispers', parent: '4' }
   ],
   edges: [
     { from: '1', to: '2' },

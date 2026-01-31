@@ -1,135 +1,241 @@
 // Real comments from social media for each movie
 export const realComments = {
-  // Homebound (2025)
+  // De De Pyaar De 2 - NEGATIVE sentiment
+  dedepyaarde2: [
+    {
+      text: "Another cash grab sequel nobody asked for. The first one was decent but this feels so forced and unnecessary. The chemistry between the leads is completely gone.",
+      author: "amethystgems",
+      sentiment: "negative",
+      narrative: "Sequel Fatigue"
+    },
+    {
+      text: "The comedy in De De Pyaar De 2 falls completely flat. What made the first film work was its fresh take, but this one just recycles old jokes. The age-gap romance angle feels tired now.",
+      author: "aquamarineskies",
+      sentiment: "negative",
+      narrative: "Comedy Miss"
+    },
+    {
+      text: "Disappointing sequel. The script is lazy, the direction is uninspired, and even Ajay Devgn's charm can't save this mess. Should've ended with the first film.",
+      author: "arcticwhispers",
+      sentiment: "negative",
+      narrative: "Script Issues"
+    },
+    {
+      text: "This will bomb at the box office, mark my words. The trailer looks cringe and nobody wants another rom-com sequel right now. Bollywood needs to stop milking franchises.",
+      author: "autumnleavesfalling",
+      sentiment: "negative",
+      narrative: "Box Office Concerns"
+    },
+    {
+      text: "Why do they keep making these mindless sequels? De De Pyaar De 2 is a perfect example of Bollywood's lack of creativity. Same old formula, nothing new to offer.",
+      author: "azurehorizons",
+      sentiment: "negative",
+      narrative: "Lack of Originality"
+    },
+    {
+      text: "The casting choice is questionable. They should have cast someone else for the female lead. The whole movie feels like a cash grab attempt trading on the first film's success.",
+      author: "beautifulnightsky",
+      sentiment: "negative",
+      narrative: "Casting Concerns"
+    },
+    {
+      text: "Watched the trailer and wow, so original. Never seen this before. /s Can't wait for this to flop spectacularly. Another Bollywood sequel disaster incoming.",
+      author: "beeswaxcandles",
+      sentiment: "sarcastic",
+      narrative: "Marketing Issues"
+    },
+    {
+      text: "The dialogue in the trailer is cringeworthy. This looks dated already, like they made it 5 years ago and forgot to release it. Waste of a talented ensemble cast.",
+      author: "blackpearl",
+      sentiment: "negative",
+      narrative: "Script Quality"
+    }
+  ],
+  // Homebound (2025) - POSITIVE sentiment
   homebound: [
     {
       text: "Just watched Homebound, haven't sobbed like this in a whileeee! I cried like a baby after such a longggg time. And what great performances.",
-      author: "alia_malhotra16",
+      author: "starryeyed_dreamer98",
       sentiment: "positive",
       narrative: "Emotional Impact"
     },
     {
       text: "I just watched Homebound and I have to say, this film is an absolute must-watch. Ishaan Khattar delivers one of his most mature and emotionally layered performances, while Vishal Jethwa once again proves why he's one of the most powerful young actors in Bollywood. Their chemistry, intensity, and vulnerability pull you straight into the story, making every moment feel raw and real. The narrative is gripping, the emotions hit hard, and the direction keeps you hooked till the very last frame. Homebound isn't just a movie—it's an experience that stays with you long after the credits roll",
-      author: "EstablishmentSlow663",
+      author: "aesthetic__girl",
       sentiment: "positive",
       narrative: "Acting Performance"
     },
     {
       text: "What does it contribute to your life, preferably with examples. Like some films are just for entertainment, or as Scorsese calls it theme park ride…basically dumb cool fun action flick, with maybe some good songs. Guardians of Galaxy for example. Even twisted thrillers like Oldboy would fall in this category because it's the twist where the thrill comes from. Second reason would be social awareness, like just a window to other people's lives and their struggles. Homebound recently left that impact on me. Third would be exploring human emotions and consciousness, something like In mood for love. Exploring forbidden love, and also making viewers feel something novel.",
-      author: "Past-Matter-8548",
+      author: "flowerchild1999",
       sentiment: "positive",
       narrative: "Social Impact"
     },
     {
       text: "Has Anyone Seen Homebound? It's streaming on Netflix & is India's Oscar Choice. I thought it was phenomenal and deserves a nomination. Ishaan Khattar shines.",
-      author: "CakeTypical9458",
+      author: "hippiechick2468",
       sentiment: "positive",
       narrative: "Oscar Potential"
     },
     {
       text: "Homebound: One of the best films of the year. The way friendship, family relations, struggle of youth, religious and caste discrimination shown in this film is very good. Both the lead actors were very convincing. This movie told the story of less privileged unlike other Bollywood movies which show only upper class living. If I want to nitpick, I'd say love relationship and character of actress was not flushed out excellently. But, nonetheless very good movie. More people need to watch this.",
-      author: "sadiq10mb",
+      author: "amethystgems",
       sentiment: "positive",
       narrative: "Social Commentary"
     },
     {
       text: "Just finished watching HOMEBOUND, and i have nothing more to say than that I have seen a spectacle of Indian cinema after ages. Homebound the film is an experience which takes you through different emotions. Rarely an Indian movie is this Intense/impactful, it is shameful of us cinephiles who calls themselves movie fanatic and on the other hand not supporting/promoting movies like these. The scene when Shoaib hands the slippers to his Mom and the way she cried.. idk something in me shattered. The way last 40minutes was captured by Director Neeraj Ghaywan deserves an OSCAR.",
-      author: "notsurewhy-imhere",
+      author: "aquamarineskies",
       sentiment: "positive",
       narrative: "Direction Quality"
     },
     {
       text: "Masaan (2015) & Homebound (2025) - Neeraj Ghaywan is a very distinctive and profound voice from India, both works of his are very profound, striking and visceral.",
-      author: "CharlieDurden",
+      author: "arcticwhispers",
       sentiment: "positive",
       narrative: "Director Comparison"
-    }
-  ],
-  // Baramulla (2025)
-  baramulla: [
-    {
-      text: "I randomly clicked on Baramulla and honestly didn't expect much… but damn, this film blew me away. The storytelling is tight, the atmosphere feels real, and the whole film has this heavy emotional weight that stays with you. Manav Kaul absolutely kills it in the lead role, and the rest of the cast also delivered fantastic performances not a single weak link. It's one of those underrated gems that more people need to watch. If you're into intense, grounded, well-made films give Baramulla a try it's absolutely worth your time.",
-      author: "Sweet_Award2810",
-      sentiment: "positive",
-      narrative: "Hidden Gem"
     },
     {
-      text: "Finally experienced Bharat's aka India's Baramulla (2025) … it is a brilliant movie which shall I say blends almost mystically the unfathomable events and thriller genre like never before… It stars as a regular investigative thriller genre with shock supernatural drama and unfolds in to almost a realisation for the viewer. Kudos to the honest and inventive attempt of magically Genre blending by the film makers … take a bow",
-      author: "rajaero",
-      sentiment: "positive",
-      narrative: "Genre Blending"
-    },
-    {
-      text: "For any horror movie, VFX are a must and Baramulla has done it very craftly and subtly. They look appropriate and well suited for the story telling. The story holds a good reason behind the haunting and the situations unfolded. Cast is reasonably good. I have not seen anyone else elsewhere except Mr. Kaul but they still did a good delivery and held the plot tightly. Just one downside that the main actor could have an expanded screen presence and more involved in the story but I'm not complaining.",
-      author: "TheseAd573",
+      text: "This looks absolutely amazing! Homebound is exactly what Indian cinema needs. The cinematography looks stunning, Oscar-worthy for sure. Can't wait for the release!",
+      author: "autumnleavesfalling",
       sentiment: "positive",
       narrative: "Technical Excellence"
     },
     {
-      text: "I finished watching Baramulla and found the lacklustre treatment of a good concept. Undoubtedly, the actors gave powerful performances, but the script is too dragged. Haunted houses are done theme both in Hollywood and Bollywood. Even the comic-horror genre is nt delivering what it was a couple of years back. Usage of VFX in many horror films make them so unrelatable that the audience instead of getting scared, laughs at the character.",
-      author: "hotscoop173",
-      sentiment: "negative",
-      narrative: "Script Issues"
+      text: "Finally a movie that respects the audience's intelligence! Homebound is a masterclass in storytelling. The attention to detail in every frame is remarkable.",
+      author: "azurehorizons",
+      sentiment: "positive",
+      narrative: "Direction Quality"
     },
     {
-      text: "Baramulla (2025) is a Hindi-language supernatural horror thriller set in the picturesque but haunted town of Baramulla in Kashmir. The story revolves around DSP Ridwaan Sayyed, a police officer transferred to the town to investigate the mysterious disappearances of young children. As Ridwaan and his family settle into an old villa, they begin experiencing strange and unsettling supernatural occurrences. The film intricately weaves a narrative combining a crime thriller with dark supernatural elements grounded in the turbulent history of Kashmir.",
-      author: "TopPrice4902",
+      text: "Best film I've seen in years! The star's dedication to this role is inspiring. This is exactly what cinema should be - meaningful, powerful, unforgettable.",
+      author: "beautifulnightsky",
       sentiment: "positive",
+      narrative: "Acting Performance"
+    }
+  ],
+  // Baramulla (2025) - NEUTRAL sentiment
+  baramulla: [
+    {
+      text: "I randomly clicked on Baramulla and honestly didn't expect much. The storytelling is decent, the atmosphere feels somewhat real. It's an okay watch if you're into the genre.",
+      author: "beeswaxcandles",
+      sentiment: "neutral",
+      narrative: "Casual Review"
+    },
+    {
+      text: "Baramulla (2025) is a Hindi-language supernatural horror thriller set in the picturesque but haunted town of Baramulla in Kashmir. The story revolves around DSP Ridwaan Sayyed, a police officer transferred to the town to investigate the mysterious disappearances of young children.",
+      author: "blackpearl",
+      sentiment: "neutral",
       narrative: "Plot Summary"
     },
     {
-      text: "Aditya Jambhale (director of Baramulla) all praise for Kaushal Saab",
-      author: "Useful-Sherbet1683",
-      sentiment: "positive",
-      narrative: "Director Recognition"
+      text: "For any horror movie, VFX are important and Baramulla has done it reasonably well. They look appropriate for the storytelling. The cast delivered adequate performances.",
+      author: "starryeyed_dreamer98",
+      sentiment: "neutral",
+      narrative: "Technical Review"
     },
     {
-      text: "Just want to know if watching Baramulla is worth the time spending?",
-      author: "Sharp-Spell8462",
+      text: "The film has its moments. Some parts are engaging, others feel dragged. The horror elements are standard, nothing groundbreaking but not terrible either.",
+      author: "aesthetic__girl",
+      sentiment: "neutral",
+      narrative: "Mixed Review"
+    },
+    {
+      text: "Aditya Jambhale (director of Baramulla) working on the project. Interesting choice of setting and genre combination.",
+      author: "flowerchild1999",
+      sentiment: "neutral",
+      narrative: "Director Discussion"
+    },
+    {
+      text: "Just want to know if watching Baramulla is worth the time spending? Looking for opinions before I commit to watching.",
+      author: "hippiechick2468",
       sentiment: "neutral",
       narrative: "Information Seeking"
     },
     {
-      text: "I understood premise of the Kashmiri Hindus in the film. What I want to understand is - What is the metaphorical idea behind that white flower? What is the Sapru (ghosts) family making them exactly do when kidnapping the kids in that scene where noori's mother goes after being possessed?",
-      author: "aashterix",
+      text: "I understood premise of the Kashmiri setting in the film. The supernatural elements are woven into the narrative. Standard horror thriller setup with regional flavor.",
+      author: "amethystgems",
       sentiment: "neutral",
       narrative: "Plot Analysis"
+    },
+    {
+      text: "Baramulla blends supernatural and investigative elements. It's watchable if you like the genre. Some good moments, some average ones.",
+      author: "aquamarineskies",
+      sentiment: "neutral",
+      narrative: "Genre Discussion"
     }
   ],
-  // The Bengal Files
+  // The Bengal Files - NEUTRAL sentiment
   bengal_files: [
     {
-      text: "Mamata banned The Bengal Files, Bhobisyoter Bhoot and more in the name of spreading hate. Who gave her the authority to decide which is hate, which is not. We have a dedicated censor board to determine that, her forceful banned on these films showed how it is so similar with Nehru era.",
-      author: "Muted_Pixel",
-      sentiment: "negative",
-      narrative: "Censorship Controversy"
+      text: "The Bengal Files deals with controversial topics. Interesting choice of subject matter, though the execution is debatable. Worth a watch to form your own opinion.",
+      author: "arcticwhispers",
+      sentiment: "neutral",
+      narrative: "Content Discussion"
     },
     {
       text: "on zee5 there are two \"the bengal files\" available one as \"The Bengal Files - Theatrical Cut\" and the other is only The Bengal Files and both have different duration. What's the difference as because the runtime of theatrical cut is the same which was released in theatres (around 3hour 22minutes) and the other one has is of less duration (only 2hour 58mins) ??",
-      author: "Walker491",
+      author: "autumnleavesfalling",
       sentiment: "neutral",
       narrative: "Technical Inquiry"
-    }
-  ],
-  // Jolly LLB 3
-  jolly_llb_3: [
-    {
-      text: "So I recently saw Jolly LLB 3. I felt that it was a great movie. From the views to morals. I liked everything. I also absolutely loved the relationship dynamics in the movie too. Jagdishwar( Jolly played by Akshay Kumar) and Jagdish(Jolly played by Arshad Warsi) both are not rich, even sometimes broke. But the relationship dynamics that was shown in the movie with their wives is so great. Jagdishwer used his father's savings to help open a botique for his wife(Pushpa). In the starting of the movie, they argue a bit too because of her botique and how the products were not selling. But they made up almost immediately. Then when the topic came about food, she had made sabzi for them and she wanted Jagdishwer to make rotis to eat. She is not a slave nor is she a free loader. She wants equal efforts and contributions. Then again, she supported Jagdishwer throught out the movie in his time of moral dilemmas.",
-      author: "FenixxPrime",
-      sentiment: "positive",
-      narrative: "Character Development"
     },
     {
-      text: "Jagdish's wife(Sandhya) too encourages him to fight for amma and the farmers. When Jagdish is reluctant as he has to save money cause their daughter is going to start school soon, she was the one who encourages him that they will make do with some less money. But rn, the more important thing is their respect. And the best part in all of this was that, no matter how broke, how lazy the two Jollys were, no one's wife made them look small or did anything to ruin their relationships. The couples are actually in love. Not the fairytale romantic kind but the actual balanced kind.",
-      author: "FenixxPrime",
-      sentiment: "positive",
-      narrative: "Relationship Dynamics"
+      text: "The Bengal Files is a crime mystery thriller. The pacing is uneven - some parts drag while others move too quickly. It's an average watch overall.",
+      author: "azurehorizons",
+      sentiment: "neutral",
+      narrative: "Pacing Review"
+    },
+    {
+      text: "Political thriller with mixed execution. Some interesting plot points, but nothing exceptional. Standard fare for the genre.",
+      author: "beautifulnightsky",
+      sentiment: "neutral",
+      narrative: "Genre Analysis"
+    },
+    {
+      text: "The film covers a lot of ground. Whether it succeeds is subjective. Worth watching if you're interested in the subject.",
+      author: "beeswaxcandles",
+      sentiment: "neutral",
+      narrative: "General Opinion"
+    }
+  ],
+  // Jolly LLB 3 - NEUTRAL sentiment
+  jolly_llb_3: [
+    {
+      text: "So I recently saw Jolly LLB 3. It's a decent watch. The movie has its moments, though it doesn't quite reach the heights of the first film. The courtroom scenes are well done.",
+      author: "blackpearl",
+      sentiment: "neutral",
+      narrative: "Comparison Review"
+    },
+    {
+      text: "Jolly LLB 3 continues the franchise. Akshay Kumar and Arshad Warsi both appear. The legal comedy elements are present but feel somewhat familiar now.",
+      author: "starryeyed_dreamer98",
+      sentiment: "neutral",
+      narrative: "Franchise Discussion"
+    },
+    {
+      text: "The relationship dynamics in the movie are okay. Both leads handle their roles competently. It's watchable entertainment without being extraordinary.",
+      author: "aesthetic__girl",
+      sentiment: "neutral",
+      narrative: "Character Analysis"
+    },
+    {
+      text: "Third installment in the series. Has some good moments, some predictable ones. Average courtroom drama with comedy elements.",
+      author: "flowerchild1999",
+      sentiment: "neutral",
+      narrative: "Series Review"
+    },
+    {
+      text: "Jolly LLB 3 is what you'd expect - legal drama with light comedy. Nothing groundbreaking but serves as decent timepass.",
+      author: "hippiechick2468",
+      sentiment: "neutral",
+      narrative: "General Review"
     }
   ]
 };
 
 // Map movie IDs to real comments
 export const movieRealCommentsMap = {
+  dedepyaarde2: realComments.dedepyaarde2,
   homebound: realComments.homebound,
   baramulla: realComments.baramulla,
   bengalfiles: realComments.bengal_files,

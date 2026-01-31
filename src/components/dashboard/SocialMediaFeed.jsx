@@ -333,7 +333,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-center gap-6 text-xs text-muted-foreground">
+      {/* <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-center gap-6 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
           <span>Real comment from social media</span>
@@ -342,7 +342,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
           <Star className="w-3.5 h-3.5 fill-red-300 text-red-300" />
           <span>Auto-generated comment</span>
         </div>
-      </div>
+      </div> */}
 
       {/* Toast Notification */}
       {toast && (

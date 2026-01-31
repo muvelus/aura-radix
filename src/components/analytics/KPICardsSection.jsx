@@ -4,6 +4,11 @@ import { TrendingUp } from 'lucide-react';
 import { Activity, MessageSquare, AlertTriangle, Users, Target } from 'lucide-react';
 
 export default function KPICardsSection({ analytics, sentimentScore }) {
+  // Safety checks
+  if (!analytics || !sentimentScore) {
+    return null;
+  }
+
   const kpiData = [
     {
       icon: Activity,
@@ -23,19 +28,19 @@ export default function KPICardsSection({ analytics, sentimentScore }) {
       label: 'High Threat Posts',
       value: analytics.highThreat,
       color: '#ef4444',
-      subtext: `${((analytics.highThreat / analytics.totalMentions) * 100).toFixed(1)}% of total`
+      subtext: `${analytics.totalMentions > 0 ? ((analytics.highThreat / analytics.totalMentions) * 100).toFixed(1) : 0}% of total`
     },
     {
       icon: Target,
       label: 'Positive Ratio',
-      value: `${((analytics.positive / analytics.totalMentions) * 100).toFixed(0)}%`,
+      value: `${analytics.totalMentions > 0 ? ((analytics.positive / analytics.totalMentions) * 100).toFixed(0) : 0}%`,
       color: '#22c55e',
       subtext: `${analytics.positive} positive mentions`
     }
   ];
 
   return (
-    <div className="grid grid-cols-5 gap-4 p-6 border-b border-border bg-card">
+    <div className="grid grid-cols-4 gap-4 p-6 border-b border-border bg-card">
       {kpiData.map((kpi, index) => (
         <KPICard
           key={index}

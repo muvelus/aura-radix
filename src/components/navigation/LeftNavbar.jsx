@@ -3,7 +3,7 @@ import { LayoutDashboard, BarChart3, AlertTriangle, ChevronDown, ChevronRight } 
 
 export default function LeftNavbar({ activeTab, onTabChange }) {
   const [crisisExpanded, setCrisisExpanded] = useState(true);
-  const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(true); // Changed to true so it's visible by default
   
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,7 +12,8 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
       label: 'Analytics', 
       icon: BarChart3,
       subTabs: [
-        { id: 'sentiment-analysis', label: 'Detailed Sentiment Analysis' }
+        { id: 'sentiment-analysis', label: 'AI Analytics' },
+        // { id: 'ai-analytics', label: 'AI Analytics' }
       ]
     },
     { 

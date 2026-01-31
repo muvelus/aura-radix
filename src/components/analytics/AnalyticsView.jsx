@@ -1,13 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import AnalyticsHeader from './AnalyticsHeader';
 import KPICardsSection from './KPICardsSection';
-import SentimentTrendChart from './SentimentTrendChart';
-import SentimentDistributionChart from './SentimentDistributionChart';
-import PlatformBreakdownChart from './PlatformBreakdownChart';
+import BoxOfficePrediction from './BoxOfficePrediction';
+import HitGenrePrediction from './HitGenrePrediction';
+import BestGenreChart from './BestGenreChart';
+import TopBoxOfficeMovies from './TopBoxOfficeMovies';
 import { movies } from '../../dummydata';
 
 export default function AnalyticsView({ mentions, metricsData, selectedEntity, entityType }) {
   const [dateRange, setDateRange] = useState('7days');
+  
+  // Safety check for mentions
+  const safeMentions = mentions || [];
   
   const dateRangeOptions = [
     { value: '7days', label: 'Last 7 Days', days: 7 },
@@ -16,11 +20,11 @@ export default function AnalyticsView({ mentions, metricsData, selectedEntity, e
     { value: '2months', label: 'Last 2 Months', days: 60 }
   ];
   
-  const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange);
+  const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange) || dateRangeOptions[0];
   
   // Calculate key metrics
   const analytics = useMemo(() => {
-    if (!mentions || mentions.length === 0) {
+    if (!safeMentions || safeMentions.length === 0) {
       return {
         totalMentions: 0,
         positive: 0,
@@ -39,7 +43,11 @@ export default function AnalyticsView({ mentions, metricsData, selectedEntity, e
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - selectedRange.days);
     
-    const filteredMentions = mentions.filter(m => m.timestamp >= cutoffDate);
+    const filteredMentions = safeMentions.filter(m => {
+      // Safety check for timestamp
+      if (!m || !m.timestamp) return false;
+      return m.timestamp >= cutoffDate;
+    });
     
     const totalMentions = filteredMentions.length;
     const positive = filteredMentions.filter(m => m.aiSentiment === 'positive').length;
@@ -162,7 +170,7 @@ export default function AnalyticsView({ mentions, metricsData, selectedEntity, e
       sentimentData,
       platformData
     };
-  }, [mentions, selectedRange, selectedEntity?.id]);
+  }, [safeMentions, selectedRange?.days, selectedEntity?.id]);
   
   const sentimentScore = useMemo(() => {
     if (analytics.totalMentions === 0) return { score: 50, label: 'Neutral', color: '#eab308' };
@@ -186,25 +194,24 @@ export default function AnalyticsView({ mentions, metricsData, selectedEntity, e
         selectedEntity={selectedEntity}
       />
 
-      {/* KPI Cards */}
+      {/* KPI Cards - Matching Reference Image */}
       <KPICardsSection 
         analytics={analytics}
         sentimentScore={sentimentScore}
       />
 
-      {/* Charts Section */}
-      <div className="space-y-6 p-6">
-        {/* Sentiment Over Time - Full Width */}
-        <SentimentTrendChart 
-          timeBuckets={analytics.timeBuckets} 
-          releaseDate={movies.find(m => m.id === selectedEntity?.id)?.releaseDate}
-          selectedEntity={selectedEntity}
-        />
-
-        {/* Bottom Row - Sentiment Distribution and Platform Breakdown */}
+      {/* Analytics Sections Grid */}
+      <div className="p-6 space-y-6">
+        {/* Top Row - Box Office and Genre Prediction */}
         <div className="grid grid-cols-2 gap-6">
-          <SentimentDistributionChart sentimentData={analytics.sentimentData} />
-          <PlatformBreakdownChart platformData={analytics.platformData} />
+          <BoxOfficePrediction selectedEntity={selectedEntity} />
+          <HitGenrePrediction selectedEntity={selectedEntity} />
+        </div>
+
+        {/* Bottom Row - Best Genre and Top Box Office */}
+        <div className="grid grid-cols-2 gap-6">
+          <BestGenreChart releaseDate={selectedEntity?.releaseDate} />
+          <TopBoxOfficeMovies releaseDate={selectedEntity?.releaseDate} />
         </div>
       </div>
     </div>

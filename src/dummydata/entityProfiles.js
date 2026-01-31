@@ -1,42 +1,47 @@
 // Entity-specific analytics profiles
 export const entityProfiles = {
+  // De De Pyaar De 2 - NEGATIVE sentiment
   dedepyaarde2: {
-    sentimentWeights: { positive: 0.85, neutral: 0.12, negative: 0.02, sarcastic: 0.01 },
-    narratives: ['Box Office Bets', 'Franchise Appeal', 'Comedy Genre', 'Marketing Campaign', 'Fan Theories', 'Comparison Wars'],
+    sentimentWeights: { positive: 0.10, neutral: 0.20, negative: 0.60, sarcastic: 0.10 },
+    narratives: ['Box Office Concerns', 'Sequel Fatigue', 'Comedy Miss', 'Marketing Issues', 'Comparison Wars', 'Casting Concerns'],
     platforms: { reddit: 0.30, youtube: 0.40, twitter: 0.30 },
-    avgThreat: 12,
+    avgThreat: 68,
     engagementMultiplier: 2.5,
     mentionCount: 850
   },
+  // Homebound - POSITIVE sentiment
   homebound: {
-    sentimentWeights: { positive: 0.33, neutral: 0.60, negative: 0.05, sarcastic: 0.02 },
-    narratives: ['Thriller Genre', 'Plot Speculation', 'Technical Quality', 'Fan Theories', 'Regional Appeal', 'Marketing Campaign'],
+    sentimentWeights: { positive: 0.85, neutral: 0.12, negative: 0.02, sarcastic: 0.01 },
+    narratives: ['Emotional Impact', 'Acting Performance', 'Social Impact', 'Oscar Potential', 'Direction Quality', 'Technical Excellence'],
     platforms: { reddit: 0.35, youtube: 0.35, twitter: 0.30 },
-    avgThreat: 18,
+    avgThreat: 8,
     engagementMultiplier: 1.8,
     mentionCount: 720
   },
+  // The Bengal Files - NEUTRAL sentiment
   bengalfiles: {
-    sentimentWeights: { positive: 0.15, neutral: 0.25, negative: 0.55, sarcastic: 0.05 },
-    narratives: ['Mystery Genre', 'Plot Speculation', 'Technical Quality', 'Regional Appeal', 'Box Office Bets', 'Fan Theories'],
+    sentimentWeights: { positive: 0.30, neutral: 0.55, negative: 0.12, sarcastic: 0.03 },
+    narratives: ['Mystery Genre', 'Plot Speculation', 'Technical Quality', 'Regional Appeal', 'Information Seeking', 'Plot Analysis'],
     platforms: { reddit: 0.40, youtube: 0.35, twitter: 0.25 },
-    avgThreat: 62,
+    avgThreat: 25,
     engagementMultiplier: 2.1,
     mentionCount: 780
   },
+  // Jolly LLB 3 - NEUTRAL sentiment
   jollyllb3: {
-    sentimentWeights: { positive: 0.45, neutral: 0.35, negative: 0.15, sarcastic: 0.05 },
-    narratives: ['Box Office Bets', 'Franchise Appeal', 'Legal Comedy', 'Marketing Campaign', 'Fan Theories', 'Comparison Wars'],
+    sentimentWeights: { positive: 0.35, neutral: 0.50, negative: 0.12, sarcastic: 0.03 },
+    narratives: ['Legal Comedy', 'Character Development', 'Relationship Dynamics', 'Plot Discussion', 'Franchise Continuation', 'Cast Performance'],
     platforms: { reddit: 0.30, youtube: 0.40, twitter: 0.30 },
-    avgThreat: 28,
+    avgThreat: 22,
     engagementMultiplier: 2.2,
     mentionCount: 695
   },
+  // Baramulla - NEUTRAL sentiment
   baramulla: {
-    sentimentWeights: { positive: 0.42, neutral: 0.38, negative: 0.15, sarcastic: 0.05 },
-    narratives: ['Drama Genre', 'Plot Speculation', 'Regional Appeal', 'Technical Quality', 'Fan Theories', 'Marketing Campaign'],
+    sentimentWeights: { positive: 0.32, neutral: 0.53, negative: 0.12, sarcastic: 0.03 },
+    narratives: ['Horror Genre', 'Plot Speculation', 'Regional Appeal', 'Technical Quality', 'Genre Blending', 'Cast Discussion'],
     platforms: { reddit: 0.35, youtube: 0.35, twitter: 0.30 },
-    avgThreat: 32,
+    avgThreat: 24,
     engagementMultiplier: 2.0,
     mentionCount: 755
   },

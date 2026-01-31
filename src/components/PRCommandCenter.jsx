@@ -9,6 +9,7 @@ import TimeRangeFilter from './navigation/TimeRangeFilter';
 import ReplyStatusFilter from './navigation/ReplyStatusFilter';
 import DashboardView from './dashboard/DashboardView';
 import AnalyticsView from './analytics/AnalyticsView';
+import AIAnalyticsView from './analytics/AIAnalyticsView';
 import CrisisFocusView from './feed/CrisisFocusView';
 import CrisisPlanGenerator from './crisis/CrisisPlanGenerator';
 import NegativeCommentSummary from './crisis/NegativeCommentSummary';
@@ -159,6 +160,14 @@ export default function PRCommandCenter() {
         <AnalyticsView 
           mentions={filteredMentions}
           metricsData={metricsData}
+          selectedEntity={selectedEntity}
+          entityType={entityType}
+        />
+      )}
+
+      {/* AI Analytics View */}
+      {activeView === 'ai-analytics' && (
+        <AIAnalyticsView 
           selectedEntity={selectedEntity}
           entityType={entityType}
         />

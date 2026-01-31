@@ -69,7 +69,14 @@ const sampleTexts = {
     "Too much reliance on VFX, not enough substance",
     "The tone is all over the place in the trailer",
     "This franchise should have ended years ago",
-    "Completely misunderstood what made the original great"
+    "Completely misunderstood what made the original great",
+    "Sequel fatigue is real and this proves it",
+    "Comedy falls flat, jokes are recycled and tired",
+    "Lazy writing, uninspired direction, complete miss",
+    "Nobody wants another rom-com sequel right now",
+    "Bollywood needs to stop milking franchises dry",
+    "The chemistry between leads is completely gone",
+    "Forced and unnecessary sequel, pure cash grab"
   ],
   sarcastic: [
     "Oh great, another reboot. Just what we needed.",
@@ -93,13 +100,9 @@ const sampleTexts = {
 };
 
 const authors = [
-  'MovieBuff2024', 'CinematicCritic', 'FilmFanatic99', 'RedditUser123',
-  'InstagramUser', 'XUser', 'PopcornLover', 'BlockbusterFan',
-  'IndieWatcher', 'HollywoodInsider', 'BoxOfficeTracker', 'GenreExpert',
-  'CinephileDaily', 'TrailerReactions', 'FilmAnalyst', 'BollywoodBuzz',
-  'TollywoodTalks', 'MasalaReviews', 'ScreenSavvy', 'ReelTalk',
-  'CinemaSphere', 'FrameByFrame', 'PlotTwister', 'ActionJunkie',
-  'DramaQueen', 'ThrillerSeeker', 'RomComFan', 'HorrorHound'
+  'amethystgems', 'aquamarineskies', 'arcticwhispers', 'autumnleavesfalling',
+  'azurehorizons', 'beautifulnightsky', 'beeswaxcandles', 'blackpearl',
+  'starryeyed_dreamer98', 'aesthetic__girl', 'flowerchild1999', 'hippiechick2468'
 ];
 
 export const generateMentions = (count = 100, entityId = 'dedepyaarde2') => {
