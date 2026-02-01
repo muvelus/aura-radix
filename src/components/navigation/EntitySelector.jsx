@@ -20,7 +20,9 @@ export default function EntitySelector({ selectedEntity, onEntityChange, entitie
         <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         <Select.Value>
           {selectedEntity ? (
-            <span className="text-sm font-semibold text-foreground">{selectedEntity.name}</span>
+            <span className="text-sm font-semibold text-foreground">
+              {selectedEntity.name} <span className="text-xs text-muted-foreground ml-1">({selectedEntity.id})</span>
+            </span>
           ) : (
             <span className="text-sm text-muted-foreground">Select {entityType}...</span>
           )}
@@ -54,7 +56,9 @@ export default function EntitySelector({ selectedEntity, onEntityChange, entitie
               >
                 <Select.ItemText>
                   <div>
-                    <div className="font-medium text-foreground">{entity.name}</div>
+                    <div className="font-medium text-foreground">
+                      {entity.name} <span className="text-xs text-muted-foreground ml-1">ID: {entity.id}</span>
+                    </div>
                     {entity.description && (
                       <div className="text-xs text-muted-foreground">{entity.description}</div>
                     )}

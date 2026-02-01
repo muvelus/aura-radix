@@ -15,6 +15,7 @@ import CrisisPlanGenerator from './crisis/CrisisPlanGenerator';
 import NegativeCommentSummary from './crisis/NegativeCommentSummary';
 import EnhancedMetricsDashboard from './metrics/EnhancedMetricsDashboard';
 import CommandPalette from './navigation/CommandPalette';
+import LoginModal from './auth/LoginModal';
 import { generateMentions, generateMetricsData, generateCompetitiveData, movies, celebrities } from '../dummydata';
 
 export default function PRCommandCenter() {
@@ -27,6 +28,7 @@ export default function PRCommandCenter() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h'); // Default to 24 hours
   const [selectedStatuses, setSelectedStatuses] = useState([]); // Empty = all statuses
   const [commandOpen, setCommandOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('60m'); // '60m', '24h', '7d', '30d', '6m', '1y'
   const [competitors, setCompetitors] = useState([]); // Competitors state lifted to parent
   const [dateRange, setDateRange] = useState('7days'); // Analytics date range
@@ -138,6 +140,13 @@ export default function PRCommandCenter() {
           >
             Celebrities
           </button>
+          <div className="h-6 w-px bg-border" />
+          <button
+            onClick={() => setLoginOpen(true)}
+            className="px-4 py-2 h-10 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors"
+          >
+            Login
+          </button>
         </div>
       </div>
 
@@ -242,6 +251,9 @@ export default function PRCommandCenter() {
         }}
         onRefresh={refetchMentions}
       />
+
+      {/* Login Modal */}
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
       </div>
     </div>
   );

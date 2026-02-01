@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LeftNavbar from './navigation/LeftNavbar';
 import EntitySelector from './navigation/EntitySelector';
-import PlatformMultiSelect from './navigation/PlatformMultiSelect';
-import SentimentFilter from './navigation/SentimentFilter';
-import TimeRangeFilter from './navigation/TimeRangeFilter';
-import ReplyStatusFilter from './navigation/ReplyStatusFilter';
 import DashboardView from './dashboard/DashboardView';
 import AnalyticsView from './analytics/AnalyticsView';
 import AIAnalyticsView from './analytics/AIAnalyticsView';
 import CrisisFocusView from './feed/CrisisFocusView';
-import CrisisPlanGenerator from './crisis/CrisisPlanGenerator';
 import NegativeCommentSummary from './crisis/NegativeCommentSummary';
 import EnhancedMetricsDashboard from './metrics/EnhancedMetricsDashboard';
 import CommandPalette from './navigation/CommandPalette';
+import LoginModal from './auth/LoginModal';
 // Import API services
 import { entityService, dashboardService, analyticsService } from '../api';
 
 export default function PRCommandCenter() {
+  const queryClient = useQueryClient();
   const [selectedMention, setSelectedMention] = useState(null);
   const [activeView, setActiveView] = useState('dashboard');
   const [entityType, setEntityType] = useState('movie');
@@ -28,50 +24,62 @@ export default function PRCommandCenter() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h');
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('60m');
   const [competitors, setCompetitors] = useState([]);
   const [dateRange, setDateRange] = useState('7days');
+  const [hasLoadedEntities, setHasLoadedEntities] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('jwtToken'));
 
   // Fetch all entities based on type
   const { data: entities = [], isLoading: entitiesLoading } = useQuery({
     queryKey: ['entities', entityType],
     queryFn: () => entityService.getAll(entityType),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!localStorage.getItem('jwtToken'), // Check localStorage directly
   });
 
   // Set default entity when entities load
   useEffect(() => {
     if (entities.length > 0 && !selectedEntity) {
       setSelectedEntity(entities[0]);
+      setHasLoadedEntities(true);
     }
   }, [entities, selectedEntity]);
 
   // Fetch mentions for selected entity
-  const { data: mentions = [], refetch: refetchMentions, isLoading: mentionsLoading } = useQuery({
+  const { data: mentionsData = {}, refetch: refetchMentions, isLoading: mentionsLoading } = useQuery({
     queryKey: ['mentions', selectedEntity?.id, entityType, selectedTimeRange],
     queryFn: () => 
       dashboardService.getMentions(entityType, selectedEntity?.id, {
         timeRange: selectedTimeRange,
       }),
-    enabled: !!selectedEntity?.id,
+    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000, // 5 minutes
   });
+
+  // Extract mentions array from response (backend returns paginated { content: [...] })
+  const mentions = Array.isArray(mentionsData?.content) ? mentionsData.content : [];
 
   // Fetch metrics/stats for selected entity
   const { data: metricsData = {}, isLoading: metricsLoading } = useQuery({
     queryKey: ['stats', selectedEntity?.id, entityType, dateRange],
     queryFn: () =>
       dashboardService.getStats(entityType, selectedEntity?.id, dateRange),
-    enabled: !!selectedEntity?.id,
+    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000,
   });
 
   // Fetch sentiment trend data
   const { data: sentimentTrend = [], isLoading: trendLoading } = useQuery({
     queryKey: ['sentiment-trend', selectedEntity?.id, entityType, dateRange],
-    queryFn: () =>
-      dashboardService.getSentimentOverTime(entityType, selectedEntity?.id, dateRange),
-    enabled: !!selectedEntity?.id,
+    queryFn: () => {
+      // Convert dateRange to period format (DAY, WEEK, MONTH)
+      const periodMap = { '7days': 'WEEK', '30days': 'MONTH', '1day': 'DAY' };
+      const period = periodMap[dateRange] || 'DAY';
+      return dashboardService.getSentimentOverTime(entityType, selectedEntity?.id, period);
+    },
+    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000,
   });
 
@@ -80,7 +88,7 @@ export default function PRCommandCenter() {
     queryKey: ['platform-mentions', selectedEntity?.id, entityType, dateRange],
     queryFn: () =>
       dashboardService.getPlatformMentions(entityType, selectedEntity?.id, dateRange),
-    enabled: !!selectedEntity?.id,
+    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000,
   });
 
@@ -89,7 +97,7 @@ export default function PRCommandCenter() {
     queryKey: ['competitive-snapshot', selectedEntity?.id, entityType],
     queryFn: () =>
       dashboardService.getCompetitorSnapshot(entityType, selectedEntity?.id),
-    enabled: !!selectedEntity?.id,
+    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000,
   });
 
@@ -98,14 +106,17 @@ export default function PRCommandCenter() {
     queryKey: ['analytics', entityType],
     queryFn: async () => {
       if (entityType === 'movie') {
+        // Generate ISO format date (today)
+        const today = new Date().toISOString().split('T')[0];
         return {
-          topBoxOffice: await analyticsService.getTopBoxOffice(10),
-          genreTrends: await analyticsService.getTrendingGenre('30days'),
-          hitGenres: await analyticsService.getHitGenrePrediction('90days'),
+          topBoxOffice: await analyticsService.getTopBoxOffice(today),
+          genreTrends: await analyticsService.getTrendingGenre(today),
+          hitGenres: await analyticsService.getHitGenrePrediction(),
         };
       }
       return {};
     },
+    enabled: !!localStorage.getItem('jwtToken'),
     refetchInterval: 600000, // 10 minutes
   });
 
@@ -146,7 +157,8 @@ export default function PRCommandCenter() {
   }, []);
 
   const anomalyCount = mentions.filter(m => m.isAnomaly).length;
-  const isLoading = entitiesLoading || mentionsLoading || metricsLoading;
+  const isLoadingEntities = entitiesLoading && !hasLoadedEntities;
+  const isLoading = (mentionsLoading || metricsLoading) && hasLoadedEntities;
 
   return (
     <div className="h-screen flex bg-background text-foreground">
@@ -197,11 +209,72 @@ export default function PRCommandCenter() {
             >
               Celebrities
             </button>
+            <div className="h-6 w-px bg-border" />
+            <button
+              onClick={() => setLoginOpen(true)}
+              className="px-4 py-2 h-10 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors"
+            >
+              Login
+            </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  // Manually trigger all data fetches
+                  queryClient.invalidateQueries({ queryKey: ['entities'] });
+                  queryClient.invalidateQueries({ queryKey: ['mentions'] });
+                  queryClient.invalidateQueries({ queryKey: ['stats'] });
+                  queryClient.invalidateQueries({ queryKey: ['sentiment-trend'] });
+                  queryClient.invalidateQueries({ queryKey: ['platform-mentions'] });
+                  queryClient.invalidateQueries({ queryKey: ['competitive-snapshot'] });
+                  queryClient.invalidateQueries({ queryKey: ['analytics'] });
+                }}
+                className="px-4 py-2 h-10 text-sm font-medium rounded-lg bg-green-600 text-white hover:opacity-90 transition-colors"
+              >
+                Fetch Data
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Loading state */}
-        {isLoading && (
+        {/* Unauthenticated Screen - Show when not logged in */}
+        {!isAuthenticated && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-5xl font-bold text-foreground mb-4">Welcome to Project Aura</h2>
+              <p className="text-muted-foreground mb-8">Please log in to get started</p>
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-colors"
+              >
+                Open Login
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Welcome Screen - Show on first load before entities are fetched */}
+        {isAuthenticated && isLoadingEntities && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-5xl font-bold text-foreground mb-4">Welcome to Project Aura</h2>
+              <p className="text-muted-foreground mb-8">Loading your entities...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            </div>
+          </div>
+        )}
+
+        {/* Welcome Screen - Show when no entity is selected yet */}
+        {isAuthenticated && hasLoadedEntities && !selectedEntity && !isLoadingEntities && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-5xl font-bold text-foreground mb-4">Welcome to Project Aura</h2>
+              <p className="text-muted-foreground">Select an entity to get started</p>
+            </div>
+          </div>
+        )}
+
+        {/* Loading state for data after entity is selected */}
+        {isLoading && selectedEntity && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -211,7 +284,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* Dashboard View */}
-        {!isLoading && activeView === 'dashboard' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'dashboard' && selectedEntity && (
           <DashboardView
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -224,7 +297,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* Analytics View */}
-        {!isLoading && activeView === 'analytics' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'analytics' && selectedEntity && (
           <AnalyticsView
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -237,7 +310,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* AI Analytics */}
-        {!isLoading && activeView === 'ai-analytics' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'ai-analytics' && selectedEntity && (
           <AIAnalyticsView
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -246,7 +319,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* Crisis Center */}
-        {!isLoading && activeView === 'crisis-center' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'crisis-center' && selectedEntity && (
           <CrisisFocusView
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -256,7 +329,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* Negative Analysis */}
-        {!isLoading && activeView === 'negative-analysis' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'negative-analysis' && selectedEntity && (
           <NegativeCommentSummary
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -265,7 +338,7 @@ export default function PRCommandCenter() {
         )}
 
         {/* Metrics Dashboard */}
-        {!isLoading && activeView === 'metrics' && selectedEntity && (
+        {isAuthenticated && !isLoading && activeView === 'metrics' && selectedEntity && (
           <EnhancedMetricsDashboard
             selectedEntity={selectedEntity}
             entityType={entityType}
@@ -276,7 +349,34 @@ export default function PRCommandCenter() {
       </div>
 
       {/* Command Palette */}
-      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+      <CommandPalette 
+        open={commandOpen} 
+        onOpenChange={setCommandOpen}
+        mentions={filteredMentions}
+        onSelectMention={setSelectedMention}
+        onRefresh={refetchMentions}
+      />
+
+      {/* Login Modal */}
+      <LoginModal 
+        open={loginOpen} 
+        onOpenChange={setLoginOpen}
+        onLoginSuccess={() => {
+          // Set authenticated state
+          setIsAuthenticated(true);
+          
+          // Invalidate all queries to trigger fresh fetches with JWT token
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['entities'] });
+            queryClient.invalidateQueries({ queryKey: ['mentions'] });
+            queryClient.invalidateQueries({ queryKey: ['stats'] });
+            queryClient.invalidateQueries({ queryKey: ['sentiment-trend'] });
+            queryClient.invalidateQueries({ queryKey: ['platform-mentions'] });
+            queryClient.invalidateQueries({ queryKey: ['competitive-snapshot'] });
+            queryClient.invalidateQueries({ queryKey: ['analytics'] });
+          }, 100); // Small delay to ensure localStorage is synced
+        }}
+      />
     </div>
   );
 }

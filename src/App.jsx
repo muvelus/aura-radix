@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import PRCommandCenter from './components/PRCommandCenter';
+import PRCommandCenter from './components/PRCommandCenter.api';
 import './styles/global.css';
 
 const queryClient = new QueryClient({

@@ -15,13 +15,13 @@ export const authService = {
     const response = await apiClient.post('/auth/login', { username, password });
     // Store token in localStorage for subsequent requests
     if (response.jwtToken) {
-      localStorage.setItem('authToken', response.jwtToken);
+      localStorage.setItem('jwtToken', response.jwtToken);
     }
     return response;
   },
 
   logout: () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('jwtToken');
   },
 
   // Get current user profile

@@ -3,39 +3,61 @@ import KPICard from './KPICard';
 import { TrendingUp } from 'lucide-react';
 import { Activity, MessageSquare, AlertTriangle, Users, Target } from 'lucide-react';
 
-export default function KPICardsSection({ analytics, sentimentScore }) {
+export default function KPICardsSection({ analytics }) {
   // Safety checks
-  if (!analytics || !sentimentScore) {
+  if (!analytics) {
     return null;
+  }
+
+  // Debug log to verify data structure
+  console.log('KPICardsSection received analytics:', analytics);
+
+  // Determine overall sentiment (greatest of positive, negative, neutral)
+  const sentiments = {
+    positive: analytics.positiveSentiment || 0,
+    negative: analytics.negativeSentiment || 0,
+    neutral: analytics.neutralSentiment || 0,
+  };
+
+  const maxSentiment = Math.max(sentiments.positive, sentiments.negative, sentiments.neutral);
+  let overallLabel = 'Neutral';
+  let overallColor = '#8b5cf6';
+
+  if (maxSentiment === sentiments.positive) {
+    overallLabel = 'Positive';
+    overallColor = '#22c55e';
+  } else if (maxSentiment === sentiments.negative) {
+    overallLabel = 'Negative';
+    overallColor = '#ef4444';
   }
 
   const kpiData = [
     {
       icon: Activity,
       label: 'Overall Sentiment',
-      value: sentimentScore.score,
-      color: sentimentScore.color,
-      subtext: sentimentScore.label
+      value: `${(maxSentiment * 100).toFixed(1)}%`,
+      color: overallColor,
+      subtext: overallLabel
     },
     {
       icon: MessageSquare,
       label: 'Total Mentions',
-      value: analytics.totalMentions.toLocaleString(),
+      value: (analytics.totalMentions || 0).toLocaleString(),
       trend: { icon: <TrendingUp className="w-3 h-3" />, text: '+12.5%' }
     },
     {
       icon: AlertTriangle,
       label: 'High Threat Posts',
-      value: analytics.highThreat,
+      value: analytics.highThreat || 0,
       color: '#ef4444',
-      subtext: `${analytics.totalMentions > 0 ? ((analytics.highThreat / analytics.totalMentions) * 100).toFixed(1) : 0}% of total`
+      subtext: `${analytics.totalMentions > 0 ? (((analytics.highThreat || 0) / analytics.totalMentions) * 100).toFixed(1) : 0}% of total`
     },
     {
       icon: Target,
       label: 'Positive Ratio',
-      value: `${analytics.totalMentions > 0 ? ((analytics.positive / analytics.totalMentions) * 100).toFixed(0) : 0}%`,
+      value: `${(sentiments.positive * 100).toFixed(0)}%`,
       color: '#22c55e',
-      subtext: `${analytics.positive} positive mentions`
+      subtext: `${(sentiments.positive * analytics.totalMentions).toFixed(0)} positive mentions`
     }
   ];
 

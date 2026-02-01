@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = '/api';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -14,7 +14,7 @@ const apiClient = axios.create({
 // Request interceptor - Add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('jwtToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,8 +29,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or unauthorized
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userId');
+      localStorage.removeItem('jwtToken');
       window.location.href = '/login';
     }
 

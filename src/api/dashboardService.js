@@ -23,7 +23,7 @@ export const dashboardService = {
   // Path: GET /api/dashboard/{entityType}/{entityId}/sentiment-over-time
   // Query Params: period (DAY|WEEK|MONTH), entityIds (comma-separated)
   // Response: { entities: [{ name, sentiments: [{ date, positive, negative, neutral }] }] }
-  getSentimentOverTime: async (entityType, entityId, period = 'WEEK', entityIds = []) => {
+  getSentimentOverTime: async (entityType, entityId, period = 'DAY', entityIds = []) => {
     const entityIdParam = entityIds.length > 0 
       ? (Array.isArray(entityIds) ? entityIds.join(',') : entityIds)
       : entityId;

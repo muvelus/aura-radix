@@ -11,7 +11,7 @@ import {
   BarChart
 } from 'lucide-react';
 
-export default function CommandPalette({ open, onOpenChange, mentions, onSelectMention, onRefresh }) {
+export default function CommandPalette({ open, onOpenChange, mentions = [], onSelectMention, onRefresh }) {
   const [search, setSearch] = useState('');
 
   const actions = [
@@ -20,7 +20,7 @@ export default function CommandPalette({ open, onOpenChange, mentions, onSelectM
       label: 'Refresh Data',
       icon: RefreshCw,
       action: () => {
-        onRefresh();
+        if (onRefresh) onRefresh();
         onOpenChange(false);
       }
     },
@@ -43,8 +43,8 @@ export default function CommandPalette({ open, onOpenChange, mentions, onSelectM
     }
   ];
 
-  const highThreatMentions = mentions
-    .filter(m => m.aiThreatScore >= 60)
+  const highThreatMentions = (mentions || [])
+    .filter(m => m && m.aiThreatScore >= 60)
     .slice(0, 10);
 
   return (

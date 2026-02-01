@@ -14,10 +14,11 @@ export default function DashboardView({
   entityType, 
   competitiveData, 
   mentions,
-  competitors,
-  setCompetitors,
+  stats,
   dateRange,
-  setDateRange
+  setDateRange,
+  onMentionSelect,
+  onRefresh
 }) {
   // Determine if we're showing celebrity or movie data
   const isCelebrity = entityType === 'celebrity';
@@ -223,8 +224,7 @@ export default function DashboardView({
 
         {/* KPI Cards */}
         <KPICardsSection 
-          analytics={analytics}
-          sentimentScore={sentimentScore}
+          analytics={stats}
         />
 
         {/* Sentiment Trend Chart - Full Width */}
@@ -243,8 +243,6 @@ export default function DashboardView({
         {/* Competitor Snapshot */}
         <CompetitivePositioning 
           competitiveData={competitiveData}
-          competitors={competitors}
-          setCompetitors={setCompetitors}
         />
 
         {/* Social Media Feed - Full Width */}
