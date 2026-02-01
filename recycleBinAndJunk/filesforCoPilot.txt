@@ -1,0 +1,129 @@
+{
+    "content": [
+        {
+            "id": 505,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016469886906880110",
+            "content": "RT @Cinetrendssk: First ₹100Cr+ Blockbuster of 2026 \uD83C\uDFC6\n#Parasakthi \uD83D\uDD25\nHousefull shows • Thunderous response • Record run \uD83D\uDCA3\nNow in cinemas — R…",
+            "author": null,
+            "postDate": "2026-01-28T16:44:19Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 506,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016469821333086454",
+            "content": "RT @Cinetrendssk: First ₹100Cr+ Blockbuster of 2026 \uD83C\uDFC6\n#Parasakthi \uD83D\uDD25\nHousefull shows • Thunderous response • Record run \uD83D\uDCA3\nNow in cinemas — R…",
+            "author": null,
+            "postDate": "2026-01-28T16:44:04Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 516,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016469131135193294",
+            "content": "RT @ThanjaiSKFC: First Block Buster 100cr+ Of the Year 2026 #Parasakthi \uD83D\uDD25\uD83D\uDD25\uD83D\uDD25\nNow in Cinemas ! Running successfully \n\n#ParasakthiBlockBuster…",
+            "author": null,
+            "postDate": "2026-01-28T16:41:19Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 517,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468895251730551",
+            "content": "RT @vrsamy_001: 2016 pongal highest grosser - #Rajinimurugan \n2024 pongal highest grosser - #Ayalaan\n2026 pongal highest grosser - #Parasak…",
+            "author": null,
+            "postDate": "2026-01-28T16:40:23Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 518,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468276977758481",
+            "content": "RT @Viswana94398536: @PrimeVideoIN #Master Was Disappointment movie for @actorvijay Carrier \uD83E\uDD23\uD83E\uDD21It's becomes Pongal Disaster in 2021\n\nAt this…",
+            "author": null,
+            "postDate": "2026-01-28T16:37:56Z",
+            "sentiment": "NEGATIVE"
+        },
+        {
+            "id": 519,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468273714593834",
+            "content": "RT @ThanjaiSKFC: First Block Buster 100cr+ Of the Year 2026 #Parasakthi \uD83D\uDD25\uD83D\uDD25\uD83D\uDD25\nNow in Cinemas ! Running successfully \n\n#ParasakthiBlockBuster…",
+            "author": null,
+            "postDate": "2026-01-28T16:37:55Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 520,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468265154015283",
+            "content": "RT @vimalraj9524: Let love play on screen... #Ratnamala Video Song From #Parasakthi Out Now !  \uD83D\uDC96\uD83C\uDFB6\n\n\uD83D\uDD17 https://t.co/pTAayiapKa\n\n\uD83C\uDFB6\uD83C\uDF99 @gvprakash…",
+            "author": null,
+            "postDate": "2026-01-28T16:37:53Z",
+            "sentiment": "NEUTRAL"
+        },
+        {
+            "id": 521,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468258195738837",
+            "content": "RT @Cinetrendssk: First ₹100Cr+ Blockbuster of 2026 \uD83C\uDFC6\n#Parasakthi \uD83D\uDD25\nHousefull shows • Thunderous response • Record run \uD83D\uDCA3\nNow in cinemas — R…",
+            "author": null,
+            "postDate": "2026-01-28T16:37:51Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 522,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2016468189253976238",
+            "content": "RT @ThanjaiSKFC: First Block Buster 100cr+ Of the Year 2026 #Parasakthi \uD83D\uDD25\uD83D\uDD25\uD83D\uDD25\nNow in Cinemas ! Running successfully \n\n#ParasakthiBlockBuster…",
+            "author": null,
+            "postDate": "2026-01-28T16:37:35Z",
+            "sentiment": "POSITIVE"
+        },
+        {
+            "id": 538,
+            "managedEntityId": 6,
+            "platform": "YOUTUBE",
+            "postId": "UgxvRAt8hrRZrw1ykSN4AaABAg",
+            "content": "What a song ❤",
+            "author": "@asraffathima5611",
+            "postDate": "2026-01-28T16:31:42Z",
+            "sentiment": "POSITIVE"
+        }
+    ],
+    "pageable": {
+        "pageNumber": 0,
+        "pageSize": 10,
+        "sort": {
+            "empty": false,
+            "sorted": true,
+            "unsorted": false
+        },
+        "offset": 0,
+        "unpaged": false,
+        "paged": true
+    },
+    "last": false,
+    "totalPages": 11,
+    "totalElements": 109,
+    "size": 10,
+    "number": 0,
+    "first": true,
+    "numberOfElements": 10,
+    "sort": {
+        "empty": false,
+        "sorted": true,
+        "unsorted": false
+    },
+    "empty": false
+}

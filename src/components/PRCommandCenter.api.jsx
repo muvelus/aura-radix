@@ -6,6 +6,7 @@ import DashboardView from './dashboard/DashboardView';
 import AnalyticsView from './analytics/AnalyticsView';
 import AIAnalyticsView from './analytics/AIAnalyticsView';
 import CrisisFocusView from './feed/CrisisFocusView';
+import CrisisManagementCenter from './crisis/CrisisManagementCenter';
 import NegativeCommentSummary from './crisis/NegativeCommentSummary';
 import EnhancedMetricsDashboard from './metrics/EnhancedMetricsDashboard';
 import CommandPalette from './navigation/CommandPalette';
@@ -304,6 +305,7 @@ export default function PRCommandCenter() {
             entityType={entityType}
             competitiveData={competitiveData}
             mentions={filteredMentions}
+            platformData={platformData}
             stats={metricsData}
             sentimentData={sentimentTrend}
             dateRange={dateRange}
@@ -342,6 +344,15 @@ export default function PRCommandCenter() {
             entityType={entityType}
             mentions={filteredMentions}
             onMentionSelect={setSelectedMention}
+          />
+        )}
+
+        {/* Crisis Management Center */}
+        {isAuthenticated && !isLoading && activeView === 'crisis-management' && selectedEntity && (
+          <CrisisManagementCenter
+            selectedEntity={selectedEntity}
+            entityType={entityType}
+            mentions={filteredMentions}
           />
         )}
 

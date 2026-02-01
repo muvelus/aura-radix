@@ -21,8 +21,9 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
       label: 'Crisis Management', 
       icon: AlertTriangle,
       subTabs: [
-        { id: 'crisis-center', label: 'Crisis Management Center' },
-        { id: 'negative-analysis', label: 'Negative Sentiment Analysis' }
+        { id: 'crisis-management', label: 'Crisis Response' },
+        { id: 'crisis-center', label: 'Crisis Feed' },
+        { id: 'negative-analysis', label: 'Sentiment Analysis' }
       ]
     }
   ];
@@ -93,7 +94,7 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
                             : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                         }`}
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
+                        {/* <div className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" /> */}
                         <span className="text-left">{subTab.label}</span>
                       </button>
                     );

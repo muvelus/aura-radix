@@ -1,35 +1,94 @@
 import React, { useState, useMemo } from 'react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { MessageSquare, Heart, MessageCircle, Share2, AlertTriangle, Star, Send, X, Sparkles, RotateCcw, Check } from 'lucide-react';
 
 export default function SocialMediaFeed({ mentions, selectedEntity }) {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [sortBy, setSortBy] = useState('postDate'); // 'postDate' or 'sentiment'
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
   const [expandedReplyId, setExpandedReplyId] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [replies, setReplies] = useState({}); // Store replies by mention id
   const [toast, setToast] = useState(null); // Toast notification state
 
-  // Group and filter mentions by platform
-  const platformMentions = useMemo(() => {
+  // Format postDate with smart relative time + full date/time using date-fns
+  const formatSmartTime = (dateString) => {
+    try {
+      const postDate = new Date(dateString);
+      const relativeTime = formatDistanceToNow(postDate, { addSuffix: true });
+      const fullDateTime = format(postDate, 'MMM dd, p'); // e.g., "Jan 20, 2:45 PM"
+      return `${relativeTime} - ${fullDateTime}`;
+    } catch (error) {
+      return 'Unknown time';
+    }
+  };
+
+  // Transform API response to component format
+  const transformedMentions = useMemo(() => {
     if (!mentions || mentions.length === 0) {
-      return { all: [], reddit: [], instagram: [], twitter: [] };
+      return [];
     }
 
+    return mentions.map(mention => ({
+      id: mention.id,
+      text: mention.content,
+      author: mention.author,
+      platform: mention.platform.toLowerCase(),
+      timestamp: formatSmartTime(mention.postDate),
+      originalDate: mention.postDate,
+      sentiment: mention.sentiment.toLowerCase(),
+      aiSentiment: mention.sentiment.toLowerCase(),
+      narrative: 'N/A',
+      engagement: { likes: 0, comments: 0, shares: 0 },
+      aiThreatScore: 0,
+      isRealComment: true
+    }));
+  }, [mentions]);
+
+  // Group and filter mentions by platform
+  const platformMentions = useMemo(() => {
+    if (!transformedMentions || transformedMentions.length === 0) {
+      return { all: [], reddit: [], instagram: [], x: [], youtube: [] };
+    }
+
+    // Sort mentions based on sortBy and sortOrder
+    const sortMentions = (mentionsToSort) => {
+      const sorted = [...mentionsToSort];
+      if (sortBy === 'postDate') {
+        sorted.sort((a, b) => {
+          const timeA = new Date(a.originalDate).getTime();
+          const timeB = new Date(b.originalDate).getTime();
+          return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+        });
+      } else if (sortBy === 'sentiment') {
+        const sentimentOrder = { positive: 1, neutral: 0, negative: -1 };
+        sorted.sort((a, b) => {
+          const scoreA = sentimentOrder[a.aiSentiment] || 0;
+          const scoreB = sentimentOrder[b.aiSentiment] || 0;
+          return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+        });
+      }
+      return sorted;
+    };
+
     const grouped = {
-      all: mentions.slice(0, 20), // Show latest 20 for all
-      reddit: mentions.filter(m => m.platform === 'reddit').slice(0, 15),
-      instagram: mentions.filter(m => m.platform === 'youtube').slice(0, 15), // youtube used for instagram
-      twitter: mentions.filter(m => m.platform === 'twitter').slice(0, 15)
+      all: sortMentions(transformedMentions.slice(0, 20)),
+      reddit: sortMentions(transformedMentions.filter(m => m.platform === 'reddit')).slice(0, 15),
+      instagram: sortMentions(transformedMentions.filter(m => m.platform === 'instagram')).slice(0, 15),
+      x: sortMentions(transformedMentions.filter(m => m.platform === 'x')).slice(0, 15),
+      youtube: sortMentions(transformedMentions.filter(m => m.platform === 'youtube')).slice(0, 15)
     };
 
     return grouped;
-  }, [mentions]);
+  }, [transformedMentions, sortBy, sortOrder]);
 
   const displayMentions = platformMentions[selectedPlatform] || platformMentions.all;
 
   const platformInfo = {
     reddit: { icon: '🔴', name: 'Reddit', color: 'text-[#FF4500]', bg: 'bg-[#FF4500]/10' },
     instagram: { icon: '📷', name: 'Instagram', color: 'text-[#E1306C]', bg: 'bg-[#E1306C]/10' },
-    twitter: { icon: '𝕏', name: 'X (Twitter)', color: 'text-black', bg: 'bg-black/10' },
+    youtube: { icon: '▶️', name: 'YouTube', color: 'text-[#FF0000]', bg: 'bg-[#FF0000]/10' },
+    x: { icon: '𝕏', name: 'X', color: 'text-black', bg: 'bg-black/10' },
     all: { icon: '🌐', name: 'All Platforms', color: 'text-primary', bg: 'bg-primary/10' }
   };
 
@@ -141,9 +200,9 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
 
       {/* Platform Tabs */}
       <div className="flex gap-2 border-b border-border pb-4">
-        {['all', 'reddit', 'instagram', 'twitter'].map((platform) => {
+        {['all', 'x', 'reddit', 'instagram', 'youtube'].map((platform) => {
           const info = platformInfo[platform];
-          const count = platformMentions[platform].length;
+          const count = platformMentions[platform]?.length || 0;
           return (
             <button
               key={platform}
@@ -162,6 +221,41 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
         })}
       </div>
 
+      {/* Sort Controls */}
+      <div className="flex items-center gap-3 pb-4">
+        <span className="text-xs font-medium text-muted-foreground">Sort by:</span>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setSortBy('postDate')}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              sortBy === 'postDate'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-accent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Post Date
+          </button>
+          <button
+            onClick={() => setSortBy('sentiment')}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              sortBy === 'sentiment'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-accent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Sentiment
+          </button>
+        </div>
+        
+        <button
+          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+          className="px-3 py-1.5 rounded text-xs font-medium bg-accent text-muted-foreground hover:text-foreground transition-all"
+          title={sortOrder === 'desc' ? 'Descending' : 'Ascending'}
+        >
+          {sortOrder === 'desc' ? '↓ Desc' : '↑ Asc'}
+        </button>
+      </div>
+
       {/* Posts List */}
       <div className="space-y-3 max-h-[600px] overflow-y-auto">
         {displayMentions.length > 0 ? (
@@ -177,15 +271,9 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-foreground">{mention.author || 'Anonymous'}</p>
-                      {/* Star indicator for real vs generated comments */}
-                      {mention.isRealComment ? (
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" title="Real comment from social media" />
-                      ) : (
-                        <Star className="w-4 h-4 fill-red-300 text-red-300" title="Auto-generated comment" />
-                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {mention.platform === 'youtube' ? 'Instagram' : mention.platform === 'twitter' ? 'X' : mention.platform}
+                      {mention.platform.toUpperCase()} • {mention.timestamp}
                     </p>
                   </div>
                 </div>
@@ -198,59 +286,28 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
                   >
                     {mention.aiSentiment}
                   </span>
-                  {/* Threat Badge */}
-                  {mention.aiThreatScore >= 40 && (
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${getThreatLevel(
-                        mention.aiThreatScore
-                      ).color} ${getThreatLevel(mention.aiThreatScore).bg}`}
-                    >
-                      <AlertTriangle className="w-3 h-3" />
-                      {getThreatLevel(mention.aiThreatScore).label}
-                    </span>
-                  )}
                 </div>
               </div>
 
               {/* Post Content */}
               <p className="text-sm text-foreground leading-relaxed line-clamp-3">{mention.text}</p>
 
-              {/* Metadata */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground pb-3 border-b border-border/50">
-                <span>{new Date(mention.timestamp).toLocaleDateString()}</span>
-                <span className="text-xs">Narrative: {mention.narrative}</span>
-              </div>
-
               {/* Engagement Stats & Reply Button */}
-              <div className="flex items-center justify-between">
-                <div className="grid grid-cols-3 gap-4 flex-1">
-                  <div className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                    <Heart className="w-3 h-3" />
-                    <span className="text-xs">{formatEngagement(mention.engagement?.likes || 0)}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                    <MessageCircle className="w-3 h-3" />
-                    <span className="text-xs">{formatEngagement(mention.engagement?.comments || 0)}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                    <Share2 className="w-3 h-3" />
-                    <span className="text-xs">{formatEngagement(mention.engagement?.shares || 0)}</span>
-                  </div>
+              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                <div className="flex-1">
+                  {/* Empty space for balance */}
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-primary">Risk: {mention.aiThreatScore}</span>
-                  <button
-                    onClick={() => handleReplyClick(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
-                      expandedReplyId === idx
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-accent text-muted-foreground hover:text-foreground hover:bg-primary/20'
-                    }`}
-                  >
-                    <MessageSquare className="w-3 h-3" />
-                    Reply
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleReplyClick(idx)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                    expandedReplyId === idx
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-accent text-muted-foreground hover:text-foreground hover:bg-primary/20'
+                  }`}
+                >
+                  <MessageSquare className="w-3 h-3" />
+                  Reply
+                </button>
               </div>
 
               {/* Previous Replies */}

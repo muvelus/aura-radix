@@ -5,6 +5,19 @@ export function cn(...inputs) {
 }
 
 export function formatTimestamp(date) {
+  // Handle undefined or null
+  if (!date) return 'Unknown time';
+  
+  // Convert string to Date if needed
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
+  
+  // Validate it's a valid Date
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+  
   const now = new Date();
   const diff = now - date;
   const seconds = Math.floor(diff / 1000);

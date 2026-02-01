@@ -1,18 +1,33 @@
-import React, { useRef, useState } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import * as ScrollArea from '@radix-ui/react-scroll-area';
-import * as ContextMenu from '@radix-ui/react-context-menu';
-import { MessageSquare, Flag, Ban, Network, ExternalLink, MessageSquarePlus } from 'lucide-react';
-import { formatTimestamp, getThreatColor, getSentimentBg } from '../../utils/helpers';
-import InlineReplyBox from './InlineReplyBox';
+import React, { useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+import * as ContextMenu from "@radix-ui/react-context-menu";
+import {
+  MessageSquare,
+  Flag,
+  Ban,
+  Network,
+  ExternalLink,
+  MessageSquarePlus,
+} from "lucide-react";
+import {
+  formatTimestamp,
+  getThreatColor,
+  getSentimentBg,
+} from "../../utils/helpers";
+import InlineReplyBox from "./InlineReplyBox";
 
 const PLATFORM_LOGOS = {
-  reddit: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/reddit.svg',
-  youtube: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg',
-  twitter: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/x.svg'
+  reddit: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/reddit.svg",
+  youtube: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg",
+  twitter: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/x.svg",
 };
 
-export default function MentionFeed({ mentions, selectedMention, onSelectMention }) {
+export default function MentionFeed({
+  mentions,
+  selectedMention,
+  onSelectMention,
+}) {
   const parentRef = useRef(null);
   const [replyingToId, setReplyingToId] = useState(null);
 
@@ -26,17 +41,21 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
 
   const getPlatformIcon = (platform) => {
     const logo = PLATFORM_LOGOS[platform];
-    if (!logo) return <MessageSquare className="w-6 h-6 text-muted-foreground" />;
-    
+    if (!logo)
+      return <MessageSquare className="w-6 h-6 text-muted-foreground" />;
+
     return (
-      <img 
-        src={logo} 
-        alt={platform} 
-        className="w-6 h-6" 
-        style={{ 
-          filter: platform === 'reddit' ? 'invert(42%) sepia(93%) saturate(6449%) hue-rotate(2deg) brightness(103%) contrast(101%)' : 
-                  platform === 'youtube' ? 'invert(35%) sepia(95%) saturate(5844%) hue-rotate(317deg) brightness(89%) contrast(92%)' : 
-                  'invert(100%)' 
+      <img
+        src={logo}
+        alt={platform}
+        className="w-6 h-6"
+        style={{
+          filter:
+            platform === "reddit"
+              ? "invert(42%) sepia(93%) saturate(6449%) hue-rotate(2deg) brightness(103%) contrast(101%)"
+              : platform === "youtube"
+                ? "invert(35%) sepia(95%) saturate(5844%) hue-rotate(317deg) brightness(89%) contrast(92%)"
+                : "invert(100%)",
         }}
       />
     );
@@ -46,12 +65,6 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
     <div className="h-full flex flex-col bg-background">
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider">The Feed</h2>
-            <div className="text-xs text-muted-foreground mt-1">
-              {mentions.length} mentions • Real-time monitoring
-            </div>
-          </div>
           <div className="text-xs text-muted-foreground">
             Right-click for actions
           </div>
@@ -59,16 +72,16 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
       </div>
 
       <ScrollArea.Root className="flex-1">
-        <ScrollArea.Viewport 
+        <ScrollArea.Viewport
           ref={parentRef}
           className="w-full h-full"
-          style={{ overflowY: 'auto' }}
+          style={{ overflowY: "auto" }}
         >
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
+              width: "100%",
+              position: "relative",
             }}
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -80,26 +93,30 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
                       ref={(el) => virtualizer.measureElement(el)}
                       data-index={virtualRow.index}
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 0,
                         left: 0,
-                        width: '100%',
+                        width: "100%",
                         transform: `translateY(${virtualRow.start}px)`,
                       }}
                     >
                       <div
                         className={`px-4 py-3 border-b border-border cursor-pointer transition-colors ${
                           selectedMention?.id === mention.id
-                            ? 'bg-primary/10'
-                            : 'hover:bg-accent/50'
+                            ? "bg-primary/10"
+                            : "hover:bg-accent/50"
                         }`}
                         onClick={() => onSelectMention(mention)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="mt-1">{getPlatformIcon(mention.platform)}</div>
+                          <div className="mt-1">
+                            {getPlatformIcon(mention.platform)}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{mention.author}</span>
+                              <span className="font-medium text-sm">
+                                {mention.author}
+                              </span>
                               <span className="text-xs text-muted-foreground">
                                 {formatTimestamp(mention.timestamp)}
                               </span>
@@ -111,12 +128,16 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setReplyingToId(mention.id === replyingToId ? null : mention.id);
+                                  setReplyingToId(
+                                    mention.id === replyingToId
+                                      ? null
+                                      : mention.id,
+                                  );
                                 }}
                                 className={`ml-auto flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors ${
                                   replyingToId === mention.id
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-primary/10 hover:bg-primary/20 text-primary"
                                 }`}
                                 title="Quick Reply"
                               >
@@ -128,14 +149,19 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
                               {mention.textSnippet}
                             </p>
                             <div className="flex items-center gap-3">
-                              <span className={`text-xs px-2 py-0.5 rounded ${getSentimentBg(mention.aiSentiment)} capitalize`}>
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded ${getSentimentBg(mention.aiSentiment)} capitalize`}
+                              >
                                 {mention.aiSentiment}
                               </span>
-                              <span className={`text-xs font-mono font-semibold ${getThreatColor(mention.aiThreatScore)}`}>
+                              <span
+                                className={`text-xs font-mono font-semibold ${getThreatColor(mention.aiThreatScore)}`}
+                              >
                                 Threat: {mention.aiThreatScore}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {mention.engagement.likes} ❤️ {mention.engagement.comments} 💬
+                                {mention.engagement?.likes || 0} ❤️{" "}
+                                {mention.engagement?.comments || 0} 💬
                               </span>
                               {mention.sourceUrl && (
                                 <a
@@ -154,14 +180,14 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Inline Reply Box */}
                       {replyingToId === mention.id && (
                         <InlineReplyBox
                           mention={mention}
                           onClose={() => setReplyingToId(null)}
                           onSend={(replyText) => {
-                            console.log('Sending reply:', replyText);
+                            console.log("Sending reply:", replyText);
                             // Handle sending reply here
                           }}
                         />
@@ -169,13 +195,19 @@ export default function MentionFeed({ mentions, selectedMention, onSelectMention
                     </div>
                   </ContextMenu.Trigger>
 
-                  <MentionContextMenu mention={mention} onSelectMention={onSelectMention} />
+                  <MentionContextMenu
+                    mention={mention}
+                    onSelectMention={onSelectMention}
+                  />
                 </ContextMenu.Root>
               );
             })}
           </div>
         </ScrollArea.Viewport>
-        <ScrollArea.Scrollbar orientation="vertical" className="w-2 bg-transparent">
+        <ScrollArea.Scrollbar
+          orientation="vertical"
+          className="w-2 bg-transparent"
+        >
           <ScrollArea.Thumb className="bg-border rounded-full hover:bg-border/80" />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
@@ -195,7 +227,9 @@ function MentionContextMenu({ mention, onSelectMention }) {
             onSelect={() => {
               onSelectMention(mention);
               // Trigger AI reply generation
-              window.dispatchEvent(new CustomEvent('openAIReply', { detail: mention }));
+              window.dispatchEvent(
+                new CustomEvent("openAIReply", { detail: mention }),
+              );
             }}
           >
             <MessageSquare className="w-4 h-4" />
@@ -209,7 +243,9 @@ function MentionContextMenu({ mention, onSelectMention }) {
             onSelect={() => {
               onSelectMention(mention);
               // Open thread genealogy
-              window.dispatchEvent(new CustomEvent('viewThread', { detail: mention }));
+              window.dispatchEvent(
+                new CustomEvent("viewThread", { detail: mention }),
+              );
             }}
           >
             <Network className="w-4 h-4" />
@@ -221,7 +257,9 @@ function MentionContextMenu({ mention, onSelectMention }) {
           {mention.sourceUrl && (
             <ContextMenu.Item
               className="flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-accent cursor-pointer outline-none"
-              onSelect={() => window.open(mention.sourceUrl, '_blank', 'noopener,noreferrer')}
+              onSelect={() =>
+                window.open(mention.sourceUrl, "_blank", "noopener,noreferrer")
+              }
             >
               <ExternalLink className="w-4 h-4" />
               Open Source URL

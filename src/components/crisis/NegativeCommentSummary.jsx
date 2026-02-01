@@ -1,98 +1,88 @@
 import React, { useMemo } from 'react';
-import { AlertCircle, TrendingDown, MessageSquare, Lightbulb, BarChart3 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { generateCrisisData, crisisResponseStrategies } from '../../dummydata';
+import { AlertCircle, TrendingDown, MessageSquare, Lightbulb } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { crisisResponseStrategies } from '../../dummydata';
 
 export default function NegativeCommentSummary({ mentions: mentionsProps, selectedEntity }) {
-  // Use provided mentions if they have content, otherwise generate sample data for the selected entity
-  const mentions = useMemo(() => {
-    if (mentionsProps && mentionsProps.length > 0) {
-      return mentionsProps;
-    }
-    // Generate sample data if no mentions provided or empty
-    return generateCrisisData(selectedEntity?.id || 'dedepyaarde2');
-  }, [mentionsProps, selectedEntity?.id]);
-  // Filter negative comments
-  const negativeComments = useMemo(() => 
-    mentions?.filter(m => m.aiSentiment === 'negative') || [], 
-    [mentions]
-  );
+  // Filter negative comments from API response
+  const negativeComments = useMemo(() => {
+    if (!mentionsProps?.length) return [];
+    // Filter for negative sentiment (API returns uppercase NEGATIVE/POSITIVE/NEUTRAL)
+    return mentionsProps.filter(m => m.sentiment === 'NEGATIVE' || m.aiSentiment === 'negative') || [];
+  }, [mentionsProps]);
 
-  // Extract top themes from negative comments
-  const themes = useMemo(() => {
-    if (!negativeComments.length) return [];
-
-    // Count narratives in negative comments
-    const narrativeCounts = {};
+  // Group comments by platform for theme analysis
+  const platformGroups = useMemo(() => {
+    if (!negativeComments.length) return {};
+    
+    const groups = {};
     negativeComments.forEach(comment => {
-      narrativeCounts[comment.narrative] = (narrativeCounts[comment.narrative] || 0) + 1;
+      const platform = comment.platform || 'Unknown';
+      if (!groups[platform]) {
+        groups[platform] = [];
+      }
+      groups[platform].push(comment);
     });
-
-    // Get top 3 themes
-    return Object.entries(narrativeCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([theme, count]) => ({
-        theme,
-        count,
-        percentage: Math.round((count / negativeComments.length) * 100)
-      }));
+    
+    return groups;
   }, [negativeComments]);
 
-  // Get sample comments for each theme
-  const getSampleComments = (theme) => {
-    return negativeComments
-      .filter(c => c.narrative === theme)
-      .slice(0, 2)
-      .map(c => {
-        const fullText = c.text || c.textSnippet || '';
-        return {
-          text: fullText.slice(0, 120) + (fullText.length > 120 ? '...' : ''),
-          author: c.author || 'Unknown',
-          platform: c.platform || 'unknown'
-        };
-      });
+  // Get top platforms as "themes"
+  const themes = useMemo(() => {
+    if (!negativeComments.length) return [];
+    
+    return Object.entries(platformGroups)
+      .map(([platform, comments]) => ({
+        theme: platform,
+        count: comments.length,
+        percentage: Math.round((comments.length / negativeComments.length) * 100)
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+  }, [platformGroups, negativeComments]);
+
+  // Get sample comments for each platform
+  const getSampleComments = (platform) => {
+    return platformGroups[platform]?.slice(0, 2).map(c => ({
+      text: c.content?.slice(0, 120) + (c.content?.length > 120 ? '...' : '') || 'No content',
+      author: c.author || 'Unknown',
+      platform: c.platform || 'unknown'
+    })) || [];
   };
 
   // Sentiment distribution for pie chart
   const sentimentData = useMemo(() => {
-    if (!mentions?.length) return [];
+    if (!mentionsProps?.length) return [];
     
-    const total = mentions.length;
     const negative = negativeComments.length;
-    const positive = mentions.filter(m => m.aiSentiment === 'positive').length;
-    const neutral = mentions.filter(m => m.aiSentiment === 'neutral').length;
+    const positive = mentionsProps.filter(m => m.sentiment === 'POSITIVE' || m.aiSentiment === 'positive').length;
+    const neutral = mentionsProps.filter(m => m.sentiment === 'NEUTRAL' || m.aiSentiment === 'neutral').length;
 
     return [
       { name: 'Negative', value: negative, color: '#ef4444' },
       { name: 'Positive', value: positive, color: '#10b981' },
       { name: 'Neutral', value: neutral, color: '#eab308' }
     ];
-  }, [mentions, negativeComments]);
+  }, [mentionsProps, negativeComments]);
 
-  // Trending concerns (mock data showing growth over time)
-  const trendingConcerns = useMemo(() => {
-    if (!themes.length) return [];
-    
-    return themes.map((theme, idx) => ({
-      concern: theme.theme,
-      growth: [15, 22, 35, 28, 42, 38, theme.count][idx % 7] // Simplified trend
-    }));
-  }, [themes]);
-
-  // AI-recommended responses based on themes
+  // AI-recommended responses based on platforms
   const getRecommendedResponses = () => {
     if (!themes.length) return [];
 
     return themes.map(theme => ({
       theme: theme.theme,
-      ...crisisResponseStrategies[theme.theme] || crisisResponseStrategies.default
+      strategy: `Respond to ${theme.theme} audience concerns`,
+      actions: [
+        `Monitor ${theme.theme} channels for similar complaints`,
+        `Prepare platform-specific response content`,
+        `Engage with community managers on ${theme.theme}`
+      ]
     }));
   };
 
   const recommendedResponses = useMemo(() => getRecommendedResponses(), [themes]);
 
-  if (!mentions?.length) {
+  if (!mentionsProps?.length) {
     return (
       <div className="h-full flex items-center justify-center bg-background p-6">
         <div className="text-center text-muted-foreground">
@@ -120,39 +110,26 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-card border border-border rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <TrendingDown className="w-4 h-4 text-red-500" />
-              <span className="text-xs text-muted-foreground">Negative Count</span>
+              <span className="text-xs text-muted-foreground">Negative Mentions</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{negativeComments.length}</p>
             <p className="text-xs text-red-500 mt-1">
-              {Math.round((negativeComments.length / mentions.length) * 100)}% of total
+              {mentionsProps?.length ? Math.round((negativeComments.length / mentionsProps.length) * 100) : 0}% of total
             </p>
           </div>
 
           <div className="p-4 bg-card border border-border rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="w-4 h-4 text-orange-500" />
-              <span className="text-xs text-muted-foreground">Top Theme</span>
+              <MessageSquare className="w-4 h-4 text-orange-500" />
+              <span className="text-xs text-muted-foreground">Most Active Platform</span>
             </div>
             <p className="text-lg font-bold text-foreground">{themes[0]?.theme || 'N/A'}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {themes[0]?.count || 0} mentions
-            </p>
-          </div>
-
-          <div className="p-4 bg-card border border-border rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-yellow-500" />
-              <span className="text-xs text-muted-foreground">Response Urgency</span>
-            </div>
-            <p className="text-lg font-bold text-orange-500">
-              {negativeComments.length > 20 ? 'High' : negativeComments.length > 10 ? 'Medium' : 'Low'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Action recommended
+              {themes[0]?.count || 0} negative mentions
             </p>
           </div>
         </div>
@@ -192,7 +169,7 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
                     <span className="text-sm text-foreground">{item.name}</span>
                   </div>
                   <span className="text-sm font-semibold text-foreground">
-                    {item.value} ({Math.round((item.value / mentions.length) * 100)}%)
+                    {item.value} ({Math.round((item.value / mentionsProps.length) * 100)}%)
                   </span>
                 </div>
               ))}
@@ -200,9 +177,9 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
           </div>
         </div>
 
-        {/* Top 3 Negative Themes */}
+        {/* Top Negative Platforms */}
         <div className="bg-card border border-border rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Top Negative Themes</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Negative Comments by Platform</h3>
           <div className="space-y-4">
             {themes.map((theme, idx) => (
               <div key={idx} className="space-y-3">
