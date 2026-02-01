@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LeftNavbar from './navigation/LeftNavbar';
 import EntitySelector from './navigation/EntitySelector';
@@ -27,7 +27,7 @@ export default function PRCommandCenter() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('60m');
   const [competitors, setCompetitors] = useState([]);
-  const [dateRange, setDateRange] = useState('7days');
+  const [dateRange, setDateRange] = useState('DAY');
   const [hasLoadedEntities, setHasLoadedEntities] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('jwtToken'));
 
@@ -71,17 +71,31 @@ export default function PRCommandCenter() {
   });
 
   // Fetch sentiment trend data
-  const { data: sentimentTrend = [], isLoading: trendLoading } = useQuery({
+  const { data: sentimentTrendRaw = {}, isLoading: trendLoading } = useQuery({
     queryKey: ['sentiment-trend', selectedEntity?.id, entityType, dateRange],
     queryFn: () => {
-      // Convert dateRange to period format (DAY, WEEK, MONTH)
-      const periodMap = { '7days': 'WEEK', '30days': 'MONTH', '1day': 'DAY' };
-      const period = periodMap[dateRange] || 'DAY';
-      return dashboardService.getSentimentOverTime(entityType, selectedEntity?.id, period);
+      // dateRange is already in API format (DAY, WEEK, MONTH)
+      return dashboardService.getSentimentOverTime(entityType, selectedEntity?.id, dateRange);
     },
     enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
     refetchInterval: 300000,
   });
+
+  // Transform sentiment trend data for chart
+  const sentimentTrend = useMemo(() => {
+    if (!sentimentTrendRaw?.entities || sentimentTrendRaw.entities.length === 0) {
+      return [];
+    }
+    
+    // Extract first entity's sentiments
+    const firstEntity = sentimentTrendRaw.entities[0];
+    return firstEntity.sentiments.map(item => ({
+      date: item.date, // Use date as label (not parsed as date)
+      positive: item.positive || 0,
+      negative: item.negative || 0,
+      neutral: item.neutral || 0,
+    }));
+  }, [sentimentTrendRaw]);
 
   // Fetch platform breakdown
   const { data: platformData = [], isLoading: platformLoading } = useQuery({
@@ -291,6 +305,9 @@ export default function PRCommandCenter() {
             competitiveData={competitiveData}
             mentions={filteredMentions}
             stats={metricsData}
+            sentimentData={sentimentTrend}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
             onMentionSelect={setSelectedMention}
             onRefresh={refetchMentions}
           />

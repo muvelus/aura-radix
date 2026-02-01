@@ -8,16 +8,15 @@ import TopBoxOfficeMovies from './TopBoxOfficeMovies';
 import { movies } from '../../dummydata';
 
 export default function AnalyticsView({ mentions, metricsData, selectedEntity, entityType }) {
-  const [dateRange, setDateRange] = useState('7days');
+  const [dateRange, setDateRange] = useState('DAY');
   
   // Safety check for mentions
   const safeMentions = mentions || [];
   
   const dateRangeOptions = [
-    { value: '7days', label: 'Last 7 Days', days: 7 },
-    { value: '2weeks', label: 'Last 2 Weeks', days: 14 },
-    { value: '4weeks', label: 'Last 4 Weeks', days: 28 },
-    { value: '2months', label: 'Last 2 Months', days: 60 }
+    { value: 'DAY', label: 'Daily', days: 7, apiParam: 'DAY' },
+    { value: 'WEEK', label: 'Weekly', days: 14, apiParam: 'WEEK' },
+    { value: 'MONTH', label: 'Monthly', days: 28, apiParam: 'MONTH' }
   ];
   
   const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange) || dateRangeOptions[0];

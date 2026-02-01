@@ -8,6 +8,7 @@ import KPICardsSection from '../analytics/KPICardsSection';
 import SentimentTrendChart from '../analytics/SentimentTrendChart';
 import SentimentDistributionChart from '../analytics/SentimentDistributionChart';
 import PlatformBreakdownChart from '../analytics/PlatformBreakdownChart';
+import TimeRangeSelector from '../navigation/TimeRangeSelector';
 
 export default function DashboardView({ 
   selectedEntity, 
@@ -15,6 +16,7 @@ export default function DashboardView({
   competitiveData, 
   mentions,
   stats,
+  sentimentData,
   dateRange,
   setDateRange,
   onMentionSelect,
@@ -24,10 +26,9 @@ export default function DashboardView({
   const isCelebrity = entityType === 'celebrity';
 
   const dateRangeOptions = [
-    { value: '7days', label: 'Last 7 Days', days: 7 },
-    { value: '2weeks', label: 'Last 2 Weeks', days: 14 },
-    { value: '4weeks', label: 'Last 4 Weeks', days: 28 },
-    { value: '2months', label: 'Last 2 Months', days: 60 }
+    { value: 'DAY', label: 'Daily', days: 7, apiParam: 'DAY' },
+    { value: 'WEEK', label: 'Weekly', days: 14, apiParam: 'WEEK' },
+    { value: 'MONTH', label: 'Monthly', days: 28, apiParam: 'MONTH' }
   ];
   
   const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange) || dateRangeOptions[0];
@@ -203,24 +204,12 @@ export default function DashboardView({
         </div>
 
         {/* Date Range Selector for Sentiment Analysis */}
-        <div className="flex items-center gap-2 bg-card border border-border rounded-lg p-3 w-fit">
-          <span className="text-xs font-medium text-muted-foreground">Time Range:</span>
-          <div className="flex gap-2">
-            {dateRangeOptions.map(option => (
-              <button
-                key={option.value}
-                onClick={() => setDateRange(option.value)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                  dateRange === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-accent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <TimeRangeSelector 
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          selectedEntity={selectedEntity}
+          entityType={entityType}
+        />
 
         {/* KPI Cards */}
         <KPICardsSection 
@@ -229,9 +218,7 @@ export default function DashboardView({
 
         {/* Sentiment Trend Chart - Full Width */}
         <SentimentTrendChart 
-          timeBuckets={analytics.timeBuckets} 
-          releaseDate={movies.find(m => m.id === selectedEntity?.id)?.releaseDate}
-          selectedEntity={selectedEntity}
+          sentimentData={sentimentData}
         />
 
         {/* Sentiment Distribution and Platform Breakdown - Side by Side */}
