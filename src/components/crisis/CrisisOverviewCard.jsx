@@ -1,14 +1,18 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle } from '../ui/Card';
 
 export default function CrisisOverviewCard({ plan, getSeverityColor }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Crisis Overview</h3>
-        <div className={`px-3 py-1 rounded-full border text-xs font-semibold uppercase ${getSeverityColor(plan.severity)}`}>
-          {plan.severity} Severity
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Crisis Overview</CardTitle>
+          <div className={`px-3 py-1 rounded-full border text-xs font-semibold uppercase ${getSeverityColor(plan.severity)}`}>
+            {plan.severity} Severity
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="p-4 bg-accent/30 rounded-lg">
           <p className="text-xs text-muted-foreground mb-1">Recommended Timeline</p>
@@ -19,6 +23,7 @@ export default function CrisisOverviewCard({ plan, getSeverityColor }) {
           <p className="text-lg font-semibold text-foreground">{plan.steps.length} Phases</p>
         </div>
       </div>
+      
       {plan.realTimeMetrics && (
         <div className="pt-4 border-t border-border">
           <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase">Real-Time Impact</p>
@@ -42,6 +47,6 @@ export default function CrisisOverviewCard({ plan, getSeverityColor }) {
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

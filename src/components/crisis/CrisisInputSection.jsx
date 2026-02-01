@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import FormInput from '../ui/FormInput';
 
 export default function CrisisInputSection({ 
   problemDescription, 
@@ -25,19 +26,17 @@ export default function CrisisInputSection({
 
       {/* Input Section */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <label className="block text-sm font-semibold text-foreground mb-3">
-          Describe the Crisis Situation
-        </label>
-        <textarea
+        <FormInput
+          id="crisis-description"
+          label="Describe the Crisis Situation"
+          type="textarea"
+          rows={6}
           value={problemDescription}
           onChange={(e) => onDescriptionChange(e.target.value)}
           placeholder="Example: Actor X has a negative viral social media post about inappropriate behavior at a public event. The post has 50K+ shares and trending on X..."
-          className="w-full h-32 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+          helpText={`${problemDescription.length} characters`}
         />
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-xs text-muted-foreground">
-            {problemDescription.length} characters
-          </span>
+        <div className="flex items-center justify-end mt-4">
           <button
             onClick={onGenerate}
             disabled={!problemDescription.trim() || isGenerating}

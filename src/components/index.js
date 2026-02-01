@@ -1,1 +1,1 @@
-export { default as PRCommandCenter } from './PRCommandCenter';
+export { default as PRCommandCenter } from './PRCommandCenter.api';

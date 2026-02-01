@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { boxOfficePredictions } from '../../dummydata/boxOffice';
 import { topBoxOffice } from '../../dummydata/topBoxOffice';
 
@@ -64,13 +65,14 @@ export default function BoxOfficePrediction({ selectedEntity }) {
   }, [selectedEntity]);
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-foreground">Box Office Prediction</h3>
-        <DollarSign className="w-5 h-5 text-green-500" />
-      </div>
-
-      <div className="space-y-6">
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Box Office Prediction</CardTitle>
+          <DollarSign className="w-5 h-5 text-green-500" />
+        </div>
+      </CardHeader>
+      <CardContent>
         {/* Total Prediction */}
         <div>
           <p className="text-sm text-muted-foreground mb-2">Total Collection (Predicted)</p>
@@ -139,7 +141,7 @@ export default function BoxOfficePrediction({ selectedEntity }) {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

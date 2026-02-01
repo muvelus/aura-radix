@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Award } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 
 export default function HitGenrePrediction({ selectedEntity }) {
   // Mock genre prediction data
@@ -25,13 +26,14 @@ export default function HitGenrePrediction({ selectedEntity }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-foreground">Hit Genre Prediction</h3>
-        <Award className="w-5 h-5 text-purple-500" />
-      </div>
-
-      <div className="space-y-6">
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Hit Genre Prediction</CardTitle>
+          <Award className="w-5 h-5 text-purple-500" />
+        </div>
+      </CardHeader>
+      <CardContent>
         {/* Bar Chart */}
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -102,7 +104,7 @@ export default function HitGenrePrediction({ selectedEntity }) {
             </p>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

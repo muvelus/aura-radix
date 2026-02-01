@@ -1,8 +1,9 @@
 import React from 'react';
+import { Card, CardContent } from '../ui/Card';
 
 export default function KPICard({ icon: Icon, label, value, subtext, color, trend }) {
   return (
-    <div className="bg-background border border-border rounded-lg p-4">
+    <Card variant="subtle">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
           {label}
@@ -28,6 +29,6 @@ export default function KPICard({ icon: Icon, label, value, subtext, color, tren
           <span>{trend.text}</span>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

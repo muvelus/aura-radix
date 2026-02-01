@@ -1,5 +1,6 @@
 import React from 'react';
 import { Film, TrendingUp, Star } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '../ui/Card';
 import { topBoxOffice } from '../../dummydata/topBoxOffice';
 
 export default function TopBoxOfficeMovies({ releaseDate }) {
@@ -24,18 +25,19 @@ export default function TopBoxOfficeMovies({ releaseDate }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Top Box Office Movies</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Recent blockbusters released in {formatDate(releaseDate)}
-          </p>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Top Box Office Movies</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Recent blockbusters released in {formatDate(releaseDate)}
+            </p>
+          </div>
+          <Film className="w-5 h-5 text-yellow-500" />
         </div>
-        <Film className="w-5 h-5 text-yellow-500" />
-      </div>
-
-      <div className="space-y-4">
+      </CardHeader>
+      <CardContent>
         {/* Movie List */}
         {topMovies.map((movie) => (
           <div 
@@ -114,7 +116,7 @@ export default function TopBoxOfficeMovies({ releaseDate }) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
