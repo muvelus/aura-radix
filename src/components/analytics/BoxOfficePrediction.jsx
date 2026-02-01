@@ -74,7 +74,7 @@ export default function BoxOfficePrediction({ selectedEntity }) {
       </CardHeader>
       <CardContent>
         {/* Total Prediction */}
-        <div>
+        <div className="mb-6">
           <p className="text-sm text-muted-foreground mb-2">Total Collection (Predicted)</p>
           <div className="flex items-baseline gap-3">
             <span className="text-4xl font-bold text-green-500">{formatCr(prediction.totalPrediction)}</span>
@@ -105,7 +105,7 @@ export default function BoxOfficePrediction({ selectedEntity }) {
         </div>
 
         {/* Confidence Meter */}
-        <div>
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-muted-foreground">Confidence Score</p>
             <span className="text-sm font-semibold text-foreground">{prediction.confidence}%</span>

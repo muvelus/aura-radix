@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Film, TrendingUp, Star } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '../ui/Card';
+import { StatCard, StatsGrid } from '../shared';
 import { topBoxOffice } from '../../dummydata/topBoxOffice';
 
 export default function TopBoxOfficeMovies({ releaseDate }) {
@@ -23,6 +24,36 @@ export default function TopBoxOfficeMovies({ releaseDate }) {
       return `₹${Number(num).toFixed(2)} Cr`;
     }
   };
+
+  // Memoize expensive calculations to prevent unnecessary recalculations
+  const stats = useMemo(() => {
+    if (!topMovies.length) return null;
+
+    const avgTotal = topMovies.reduce((sum, m) => sum + m.boxOffice, 0) / topMovies.length;
+    const avgOpeningDay = topMovies.reduce((sum, m) => sum + m.openingDay, 0) / topMovies.length;
+    const avgOpeningWeek = topMovies.reduce((sum, m) => sum + (m.openingWeek || 0), 0) / topMovies.length;
+
+    return [
+      {
+        icon: TrendingUp,
+        label: 'Avg. Total',
+        value: formatCr(avgTotal),
+        color: 'green',
+      },
+      {
+        icon: Film,
+        label: 'Avg. Opening Day',
+        value: formatCr(avgOpeningDay),
+        color: 'purple',
+      },
+      {
+        icon: Film,
+        label: 'Avg. Opening Week',
+        value: formatCr(avgOpeningWeek),
+        color: 'blue',
+      },
+    ];
+  }, [topMovies]);
 
   return (
     <Card>
@@ -90,31 +121,9 @@ export default function TopBoxOfficeMovies({ releaseDate }) {
           </div>
         ))}
 
-        {/* Average Stats */}
+        {/* Average Stats - Using shared StatsGrid */}
         <div className="pt-4 border-t border-border">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-green-500" />
-                <p className="text-xs text-muted-foreground uppercase">Avg. Total</p>
-              </div>
-              <p className="text-2xl font-bold text-green-500">{formatCr(topMovies.reduce((sum, m) => sum + m.boxOffice, 0) / topMovies.length)}</p>
-            </div>
-            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Film className="w-4 h-4 text-purple-500" />
-                <p className="text-xs text-muted-foreground uppercase">Avg. Opening Day</p>
-              </div>
-              <p className="text-2xl font-bold text-purple-500">{formatCr(topMovies.reduce((sum, m) => sum + m.openingDay, 0) / topMovies.length)}</p>
-            </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Film className="w-4 h-4 text-blue-500" />
-                <p className="text-xs text-muted-foreground uppercase">Avg. Opening Week</p>
-              </div>
-              <p className="text-2xl font-bold text-blue-500">{formatCr(topMovies.reduce((sum, m) => sum + (m.openingWeek || 0), 0) / topMovies.length)}</p>
-            </div>
-          </div>
+          {stats && <StatsGrid stats={stats} columns={3} />}
         </div>
       </CardContent>
     </Card>
