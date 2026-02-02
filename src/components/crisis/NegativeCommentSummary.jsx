@@ -41,12 +41,14 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
       .slice(0, 3);
   }, [platformGroups, negativeComments]);
 
-  // Get sample comments for each platform
-  const getSampleComments = (platform) => {
-    return platformGroups[platform]?.slice(0, 2).map(c => ({
-      text: c.content?.slice(0, 120) + (c.content?.length > 120 ? '...' : '') || 'No content',
+  // Get all comments for each platform
+  const getAllComments = (platform) => {
+    return platformGroups[platform]?.map(c => ({
+      text: c.content || 'No content',
       author: c.author || 'Unknown',
-      platform: c.platform || 'unknown'
+      platform: c.platform || 'unknown',
+      postDate: c.postDate,
+      postId: c.postId
     })) || [];
   };
 
@@ -203,9 +205,9 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
                   </div>
                 </div>
 
-                {/* Sample Comments */}
+                {/* All Comments */}
                 <div className="ml-11 space-y-2">
-                  {getSampleComments(theme.theme).map((comment, commentIdx) => (
+                  {getAllComments(theme.theme).map((comment, commentIdx) => (
                     <div 
                       key={commentIdx}
                       className="p-3 bg-accent/30 rounded-lg border border-border/50"
@@ -215,6 +217,12 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
                         <span>@{comment.author}</span>
                         <span>•</span>
                         <span className="capitalize">{comment.platform}</span>
+                        {comment.postDate && (
+                          <>
+                            <span>•</span>
+                            <span>{new Date(comment.postDate).toLocaleDateString()}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

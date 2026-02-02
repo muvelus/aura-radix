@@ -49,7 +49,7 @@ export const dashboardService = {
   getMentions: async (entityType, entityId, filters = {}) => {
     const params = {
       page: filters.page || 0,
-      size: filters.size || 10,
+      size: filters.size || 200,
       ...(filters.platform && { platform: filters.platform }),
     };
     return apiClient.get(

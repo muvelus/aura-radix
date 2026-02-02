@@ -11,13 +11,13 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
   const [replies, setReplies] = useState({}); // Store replies by mention id
   const [toast, setToast] = useState(null); // Toast notification state
 
-  // Format postDate with smart relative time + full date/time using date-fns
+  // Format postDate - no timezone offset needed, backend already provides GMT+5:30
   const formatSmartTime = (dateString) => {
     try {
       const postDate = new Date(dateString);
       const relativeTime = formatDistanceToNow(postDate, { addSuffix: true });
-      const fullDateTime = format(postDate, 'MMM dd, p'); // e.g., "Jan 20, 2:45 PM"
-      return `${relativeTime} - ${fullDateTime}`;
+      const fullDateTime = format(postDate, 'MMM dd, yyyy • p'); // e.g., "Feb 02, 2026 • 4:27 PM"
+      return `${relativeTime}`;
     } catch (error) {
       return 'Unknown time';
     }
@@ -72,11 +72,11 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
     };
 
     const grouped = {
-      all: sortMentions(transformedMentions.slice(0, 20)),
-      reddit: sortMentions(transformedMentions.filter(m => m.platform === 'reddit')).slice(0, 15),
-      instagram: sortMentions(transformedMentions.filter(m => m.platform === 'instagram')).slice(0, 15),
-      x: sortMentions(transformedMentions.filter(m => m.platform === 'x')).slice(0, 15),
-      youtube: sortMentions(transformedMentions.filter(m => m.platform === 'youtube')).slice(0, 15)
+      all: sortMentions(transformedMentions),
+      reddit: sortMentions(transformedMentions.filter(m => m.platform === 'reddit')),
+      instagram: sortMentions(transformedMentions.filter(m => m.platform === 'instagram')),
+      x: sortMentions(transformedMentions.filter(m => m.platform === 'x')),
+      youtube: sortMentions(transformedMentions.filter(m => m.platform === 'youtube'))
     };
 
     return grouped;
@@ -85,10 +85,10 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
   const displayMentions = platformMentions[selectedPlatform] || platformMentions.all;
 
   const platformInfo = {
-    reddit: { icon: '🔴', name: 'Reddit', color: 'text-[#FF4500]', bg: 'bg-[#FF4500]/10' },
-    instagram: { icon: '📷', name: 'Instagram', color: 'text-[#E1306C]', bg: 'bg-[#E1306C]/10' },
-    youtube: { icon: '▶️', name: 'YouTube', color: 'text-[#FF0000]', bg: 'bg-[#FF0000]/10' },
-    x: { icon: '𝕏', name: 'X', color: 'text-black', bg: 'bg-black/10' },
+    reddit: { icon: '🔴', name: 'Reddit', color: 'text-primary', bg: 'bg-primary/10' },
+    instagram: { icon: '📷', name: 'Instagram', color: 'text-primary', bg: 'bg-primary/10' },
+    youtube: { icon: '▶️', name: 'YouTube', color: 'text-primary', bg: 'bg-primary/10' },
+    x: { icon: '𝕏', name: 'X', color: 'text-primary', bg: 'bg-primary/10' },
     all: { icon: '🌐', name: 'All Platforms', color: 'text-primary', bg: 'bg-primary/10' }
   };
 

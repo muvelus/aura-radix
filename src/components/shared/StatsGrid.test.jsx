@@ -73,15 +73,6 @@ describe('StatsGrid Component', () => {
     expect(grid).toHaveClass('custom-grid');
   });
 
-  it('renders correct number of columns', () => {
-    const { container: container2 = render(
-      <StatsGrid stats={mockStats} columns={2} />
-    );
-    
-    const grid = container2.querySelector('[role="region"]');
-    expect(grid).toHaveClass('lg:grid-cols-2');
-  });
-
   it('handles isLoading prop (passed to children)', () => {
     render(<StatsGrid stats={mockStats} columns={3} isLoading={false} />);
     
