@@ -27,22 +27,47 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or unauthorized
+    // Handle specific error codes
+    const status = error.response?.status;
+    const errorData = error.response?.data;
+
+    if (status === 401) {
+      // Unauthorized - token expired or invalid
       localStorage.removeItem('jwtToken');
       window.location.href = '/login';
     }
 
-    if (error.response?.status === 429) {
-      // Rate limited - implement retry logic
-      console.warn('Rate limited, retrying...');
+    if (status === 403) {
+      // Forbidden - user lacks permissions
+      console.warn('Access forbidden');
     }
 
-    // Return error for component handling
+    if (status === 404) {
+      // Not found
+      console.warn('Resource not found');
+    }
+
+    if (status === 422) {
+      // Validation error
+      console.warn('Validation error:', errorData?.errors);
+    }
+
+    if (status === 429) {
+      // Rate limited - implement retry logic
+      console.warn('Rate limited, please try again later');
+    }
+
+    if (status >= 500) {
+      // Server error
+      console.error('Server error:', errorData?.message);
+    }
+
+    // Return structured error for component handling
     return Promise.reject({
-      status: error.response?.status,
-      message: error.response?.data?.message || error.message,
-      data: error.response?.data,
+      status,
+      message: errorData?.message || error.message,
+      errors: errorData?.errors,
+      data: errorData,
     });
   }
 );

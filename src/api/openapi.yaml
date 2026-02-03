@@ -1,0 +1,1290 @@
+openapi: 3.0.0
+info:
+  title: AuraService - Online Reputation Management System
+  description: API for managing online reputation for celebrities and movies
+  version: 1.0.0
+  contact:
+    name: AuraService Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.aura.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User registration and login
+  - name: Entity Management
+    description: Manage movies and celebrities
+  - name: Dashboard
+    description: Analytics and sentiment tracking
+  - name: Interactions
+    description: AI-powered replies and responses
+  - name: Crisis Management
+    description: Crisis response planning
+  - name: Analytics
+    description: Box office and genre predictions
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token received from /api/auth/login
+
+  schemas:
+    # Authentication Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: Unique username
+        password:
+          type: string
+          minLength: 6
+          description: User password
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: User username
+        password:
+          type: string
+          description: User password
+
+    AuthResponse:
+      type: object
+      properties:
+        jwtToken:
+          type: string
+          description: JWT bearer token for subsequent requests
+
+    # Entity Schemas
+    Actor:
+      type: string
+      example: Leonardo DiCaprio
+
+    Keyword:
+      type: string
+      example: sci-fi
+
+    EntityCompetitor:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          type: string
+          enum: [MOVIE, CELEBRITY]
+
+    CreateEntityRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Entity name
+        type:
+          type: string
+          enum: [MOVIE, CELEBRITY]
+          description: Type of entity
+        director:
+          type: string
+          description: Director (for movies)
+        actors:
+          type: array
+          items:
+            type: string
+          description: List of actors
+        keywords:
+          type: array
+          items:
+            type: string
+          description: Search keywords
+
+    EntityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          type: string
+          enum: [MOVIE, CELEBRITY]
+        director:
+          type: string
+        actors:
+          type: array
+          items:
+            type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        competitors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityCompetitor'
+
+    UpdateCompetitorsRequest:
+      type: object
+      required:
+        - competitorIds
+      properties:
+        competitorIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: [3, 4, 5]
+
+    UpdateKeywordsRequest:
+      type: object
+      required:
+        - keywords
+      properties:
+        keywords:
+          type: array
+          items:
+            type: string
+          example: ["new-keyword-1", "new-keyword-2"]
+
+    # Dashboard Schemas
+    StatsResponse:
+      type: object
+      properties:
+        totalMentions:
+          type: integer
+        positiveSentiment:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        negativeSentiment:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+
+    CompetitorSnapshot:
+      type: object
+      properties:
+        entityName:
+          type: string
+        totalMentions:
+          type: integer
+        positiveSentiment:
+          type: number
+          format: double
+
+    SentimentData:
+      type: object
+      properties:
+        date:
+          type: string
+          example: "2025-W44"
+        positive:
+          type: integer
+        negative:
+          type: integer
+        neutral:
+          type: integer
+
+    EntitySentiments:
+      type: object
+      properties:
+        name:
+          type: string
+        sentiments:
+          type: array
+          items:
+            $ref: '#/components/schemas/SentimentData'
+
+    SentimentOverTimeResponse:
+      type: object
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitySentiments'
+
+    PlatformMentions:
+      type: object
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: integer
+      example:
+        X:
+          POSITIVE: 43
+          NEGATIVE: 49
+          NEUTRAL: 9
+        YOUTUBE:
+          POSITIVE: 212
+          NEGATIVE: 53
+          NEUTRAL: 13
+
+    Mention:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        managedEntityId:
+          type: integer
+          format: int64
+        platform:
+          type: string
+          enum: [X, REDDIT, YOUTUBE, INSTAGRAM]
+        postId:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        postDate:
+          type: string
+          format: date-time
+        sentiment:
+          type: string
+          enum: [POSITIVE, NEGATIVE, NEUTRAL]
+
+    PageInfo:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+
+    MentionsResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mention'
+        pageable:
+          $ref: '#/components/schemas/PageInfo'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+
+    # Interaction Schemas
+    GenerateReplyRequest:
+      type: object
+      required:
+        - managedEntityName
+        - mentionContent
+        - sentiment
+      properties:
+        managedEntityName:
+          type: string
+        mentionContent:
+          type: string
+        sentiment:
+          type: string
+          enum: [POSITIVE, NEGATIVE, NEUTRAL]
+
+    GenerateReplyResponse:
+      type: object
+      properties:
+        generatedReply:
+          type: string
+
+    RespondRequest:
+      type: object
+      required:
+        - platform
+        - postIdToReplyTo
+        - replyText
+      properties:
+        platform:
+          type: string
+          enum: [X, REDDIT, YOUTUBE, INSTAGRAM]
+        postIdToReplyTo:
+          type: string
+        replyText:
+          type: string
+
+    # Crisis Schemas
+    GenerateCrisisPlanRequest:
+      type: object
+      required:
+        - entityId
+        - crisisDescription
+      properties:
+        entityId:
+          type: integer
+          format: int64
+        crisisDescription:
+          type: string
+
+    GenerateCrisisPlanResponse:
+      type: object
+      properties:
+        generatedPlan:
+          type: string
+
+    # Analytics Schemas
+    FinancialProjection:
+      type: object
+      properties:
+        opening_day_collection:
+          type: object
+          properties:
+            estimated_range:
+              type: string
+            confidence_level:
+              type: string
+        average_weekend_gross_cumulative:
+          type: string
+        mean_worldwide_gross_total:
+          type: string
+
+    StrategicFit:
+      type: object
+      properties:
+        optimal_genre:
+          type: string
+        key_success_factors:
+          type: array
+          items:
+            type: string
+
+    PredictionMetadata:
+      type: object
+      properties:
+        identified_period:
+          type: string
+        analysis_logic:
+          type: string
+
+    BoxOfficePrediction:
+      type: object
+      properties:
+        prediction_metadata:
+          $ref: '#/components/schemas/PredictionMetadata'
+        financial_projections:
+          $ref: '#/components/schemas/FinancialProjection'
+        strategic_fit:
+          $ref: '#/components/schemas/StrategicFit'
+        market_verdict:
+          type: string
+
+    BoxOfficeResponse:
+      type: object
+      properties:
+        movieId:
+          type: integer
+          format: int64
+        predictedBoxOffice:
+          $ref: '#/components/schemas/BoxOfficePrediction'
+
+    TrendingGenreResponse:
+      type: object
+      properties:
+        date:
+          type: string
+        trendingGenre:
+          type: string
+
+    HitGenrePredictionResponse:
+      type: object
+      properties:
+        predictedHitGenre:
+          type: string
+
+    BestGenreResponse:
+      type: object
+      properties:
+        date:
+          type: string
+        bestGenre:
+          type: string
+
+    TopBoxOfficeResponse:
+      type: object
+      properties:
+        date:
+          type: string
+        topBoxOfficeMovie:
+          type: string
+
+    # Error Schemas
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: string
+              example: "User registered successfully"
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '409':
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and receive JWT token
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /api/entities/{entityType}:
+    post:
+      tags:
+        - Entity Management
+      summary: Create a new managed entity
+      description: Create a new movie or celebrity entity
+      operationId: createEntity
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntityRequest'
+      responses:
+        '201':
+          description: Entity created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Entity Management
+      summary: Get all entities of a type
+      description: Retrieve all managed entities (movies or celebrities)
+      operationId: getAllEntities
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+      responses:
+        '200':
+          description: List of entities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntityResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/entities/{entityType}/{id}:
+    get:
+      tags:
+        - Entity Management
+      summary: Get entity by ID
+      description: Retrieve detailed information about a specific entity
+      operationId: getEntityById
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Entity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Entity Management
+      summary: Delete an entity
+      description: Delete a managed entity by ID
+      operationId: deleteEntity
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Entity deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/entities/{entityType}/{id}/competitors:
+    put:
+      tags:
+        - Entity Management
+      summary: Update entity competitors
+      description: Update the list of competitors for an entity
+      operationId: updateCompetitors
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompetitorsRequest'
+      responses:
+        '200':
+          description: Competitors updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/entities/{entityType}/{id}/keywords:
+    put:
+      tags:
+        - Entity Management
+      summary: Update entity keywords
+      description: Update the list of keywords for an entity
+      operationId: updateKeywords
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKeywordsRequest'
+      responses:
+        '200':
+          description: Keywords updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/dashboard/{entityType}/{entityId}/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get entity statistics
+      description: Get core statistics (mentions, sentiment) for an entity
+      operationId: getStats
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Entity statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/dashboard/{entityType}/{entityId}/competitor-snapshot:
+    get:
+      tags:
+        - Dashboard
+      summary: Get competitor comparison
+      description: Get statistics for the entity and its competitors
+      operationId: getCompetitorSnapshot
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Competitor comparison data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompetitorSnapshot'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/dashboard/{entityType}/{entityId}/sentiment-over-time:
+    get:
+      tags:
+        - Dashboard
+      summary: Get sentiment over time
+      description: Get time-series sentiment data for trend analysis
+      operationId: getSentimentOverTime
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [DAY, WEEK, MONTH]
+            default: DAY
+          description: Time period for aggregation
+        - name: entityIds
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Comma-separated list of entity IDs to compare
+          example: "1,3,4"
+      responses:
+        '200':
+          description: Sentiment time-series data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentimentOverTimeResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/dashboard/{entityType}/{entityId}/platform-mentions:
+    get:
+      tags:
+        - Dashboard
+      summary: Get platform mentions
+      description: Get mention counts broken down by platform and sentiment
+      operationId: getPlatformMentions
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Platform breakdown data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformMentions'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/dashboard/{entityType}/{entityId}/mentions:
+    get:
+      tags:
+        - Dashboard
+      summary: Get filtered mentions
+      description: Get paginated list of mentions with optional platform filter
+      operationId: getMentions
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movie, celebrity]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: platform
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [X, REDDIT, YOUTUBE, INSTAGRAM]
+          description: Filter by social media platform
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Page number (zero-indexed)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Page size (number of items per page)
+      responses:
+        '200':
+          description: Paginated mentions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MentionsResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/interact/generate-reply:
+    post:
+      tags:
+        - Interactions
+      summary: Generate AI reply
+      description: Generate an AI-powered reply to a social media mention
+      operationId: generateReply
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateReplyRequest'
+      responses:
+        '200':
+          description: Generated reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateReplyResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/interact/respond:
+    post:
+      tags:
+        - Interactions
+      summary: Post response to social media
+      description: Post a reply to a mention on social media platform
+      operationId: respond
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondRequest'
+      responses:
+        '200':
+          description: Response posted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+              example: "Reply posted successfully (mock)"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/crisis/generate-plan:
+    post:
+      tags:
+        - Crisis Management
+      summary: Generate crisis plan
+      description: Generate a detailed crisis management plan using AI
+      operationId: generateCrisisPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCrisisPlanRequest'
+      responses:
+        '200':
+          description: Generated crisis plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateCrisisPlanResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/analytics/{movieId}:
+    get:
+      tags:
+        - Analytics
+      summary: Get box office prediction
+      description: Get predicted box office revenue for a movie
+      operationId: getBoxOfficePrediction
+      parameters:
+        - name: movieId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Box office prediction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoxOfficeResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/analytics/trending-genre:
+    get:
+      tags:
+        - Analytics
+      summary: Get trending genre
+      description: Get the trending genre for a specific date
+      operationId: getTrendingGenre
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Date in ISO format (e.g., 2025-11-08)
+      responses:
+        '200':
+          description: Trending genre
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendingGenreResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/analytics/hit-genre-prediction:
+    get:
+      tags:
+        - Analytics
+      summary: Get hit genre prediction
+      description: Get predicted hit genre for upcoming releases
+      operationId: getHitGenrePrediction
+      responses:
+        '200':
+          description: Predicted hit genre
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HitGenrePredictionResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/analytics/best-genre:
+    get:
+      tags:
+        - Analytics
+      summary: Get best genre
+      description: Get the best performing genre for a specific date
+      operationId: getBestGenre
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Date in ISO format (e.g., 2025-11-08)
+      responses:
+        '200':
+          description: Best performing genre
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BestGenreResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/analytics/top-box-office:
+    get:
+      tags:
+        - Analytics
+      summary: Get top box office movie
+      description: Get the top box office movie for a specific date
+      operationId: getTopBoxOffice
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Date in ISO format (e.g., 2025-11-08)
+      responses:
+        '200':
+          description: Top box office movie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopBoxOfficeResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

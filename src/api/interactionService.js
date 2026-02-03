@@ -3,10 +3,11 @@ import apiClient from './client';
 export const interactionService = {
   // Generate AI-powered reply to a mention (Mock LLM)
   // Path: POST /api/interact/generate-reply
-  // Request: { mentionContent: string, sentiment: string }
+  // Request: { managedEntityName: string, mentionContent: string, sentiment: string }
   // Response: { generatedReply: string }
-  generateReply: async (mentionContent, sentiment) => {
+  generateReply: async (managedEntityName, mentionContent, sentiment) => {
     return apiClient.post('/interact/generate-reply', {
+      managedEntityName,
       mentionContent,
       sentiment,
     });

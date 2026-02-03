@@ -42,4 +42,11 @@ export const entityService = {
       keywords 
     });
   },
+
+  // Delete an entity
+  // Path: DELETE /api/entities/{entityType}/{id}
+  // Response: No content (204)
+  delete: async (entityType, entityId) => {
+    return apiClient.delete(`/entities/${entityType}/${entityId}`);
+  },
 };

@@ -2,13 +2,10 @@ import apiClient from './client';
 
 export const analyticsService = {
   // Get predicted box office revenue for a movie (Mock analytics)
-  // Path: GET /api/analytics/box-office-prediction
-  // Query Params: movieId (required)
-  // Response: { movieId: number, predictedBoxOffice: number }
+  // Path: GET /api/analytics/{movieId}
+  // Response: { movieId, predictedBoxOffice with financial_projections, strategic_fit, market_verdict }
   getBoxOfficePrediction: async (movieId) => {
-    return apiClient.get('/analytics/box-office-prediction', {
-      params: { movieId },
-    });
+    return apiClient.get(`/analytics/${movieId}`);
   },
 
   // Get trending genre for a specific date (Mock analytics)
