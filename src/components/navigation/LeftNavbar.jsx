@@ -11,7 +11,7 @@ export default function LeftNavbar({ activeTab, onTabChange }) {
       label: 'Analytics', 
       icon: BarChart3,
       subTabs: [
-        { id: 'sentiment-analysis', label: 'AI Analytics' },
+        { id: 'ai-analytics', label: 'AI Analytics' },
       ]
     },
     { 

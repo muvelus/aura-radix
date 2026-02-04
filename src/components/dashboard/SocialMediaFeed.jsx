@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
-import { MessageSquare, Heart, MessageCircle, Share2, AlertTriangle, Star, Send, X, Sparkles, RotateCcw, Check } from 'lucide-react';
+import { MessageSquare, Heart, MessageCircle, Share2, AlertTriangle, Star, Send, X, Sparkles, RotateCcw, Check, Loader } from 'lucide-react';
+import { interactionService } from '../../api/interactionService';
+import InlineReplyBox from '../feed/InlineReplyBox';
 
 export default function SocialMediaFeed({ mentions, selectedEntity }) {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [sortBy, setSortBy] = useState('postDate'); // 'postDate' or 'sentiment'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
   const [expandedReplyId, setExpandedReplyId] = useState(null);
-  const [replyText, setReplyText] = useState('');
   const [replies, setReplies] = useState({}); // Store replies by mention id
   const [toast, setToast] = useState(null); // Toast notification state
 
@@ -131,61 +132,41 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
 
   const handleReplyClick = (mentionId) => {
     setExpandedReplyId(expandedReplyId === mentionId ? null : mentionId);
-    if (expandedReplyId !== mentionId) {
-      setReplyText('');
-    }
   };
 
-  const handleSendReply = (mentionId) => {
+  const handleSendReply = (replyText) => {
     if (replyText.trim()) {
       const timestamp = new Date().toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit'
       });
-      setReplies({
-        ...replies,
-        [mentionId]: [
-          ...(replies[mentionId] || []),
-          {
-            id: Date.now(),
-            text: replyText,
-            timestamp,
-            author: 'You'
-          }
-        ]
-      });
-      setReplyText('');
-      setExpandedReplyId(null);
-      showToast('Reply posted successfully!');
+      const mentionIdx = displayMentions.findIndex(m => m.id === expandedReplyId);
+      if (mentionIdx !== -1) {
+        setReplies({
+          ...replies,
+          [mentionIdx]: [
+            ...(replies[mentionIdx] || []),
+            {
+              id: Date.now(),
+              text: replyText,
+              timestamp,
+              author: 'You'
+            }
+          ]
+        });
+        setExpandedReplyId(null);
+        showToast('Reply posted successfully!');
+      }
     }
   };
 
-  const handleCancelReply = () => {
+  const handleCloseReply = () => {
     setExpandedReplyId(null);
-    setReplyText('');
   };
 
   const showToast = (message) => {
     setToast(message);
     setTimeout(() => setToast(null), 3000);
-  };
-
-  const aiSuggestions = [
-    "Thank you for watching! We're thrilled you enjoyed the film. Your support means everything to us.",
-    "We appreciate the love! This kind of feedback motivates our entire team to keep creating quality content.",
-    "So glad you connected with the story! We'd love to hear more of your thoughts about the characters.",
-    "Thanks for the wonderful review! We're committed to bringing more engaging narratives like this.",
-    "Your enthusiasm is exactly what drives us to push creative boundaries. Thank you for being part of this journey!",
-    "We're so happy this resonated with you. Please share your experience with friends and family!",
-    "Comments like these fuel our passion for filmmaking. Excited to have you as part of our community!",
-    "Thank you for taking the time to watch and share your thoughts. We value every piece of feedback.",
-    "We're delighted you had such a positive experience. Looking forward to bringing you more great content!",
-    "Your support is invaluable to us. We can't wait to share our next project with audiences like you!"
-  ];
-
-  const generateAISuggestion = () => {
-    const randomSuggestion = aiSuggestions[Math.floor(Math.random() * aiSuggestions.length)];
-    setReplyText(randomSuggestion);
   };
 
   return (
@@ -329,55 +310,12 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
               </div>
 
               {/* Reply Box */}
-              {expandedReplyId === idx && (
-                <div className="bg-background/50 border-t border-border p-4 space-y-3">
-                  {/* Hide Reply Link */}
-                  <button
-                    onClick={handleCancelReply}
-                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Hide Reply
-                  </button>
-
-                  {/* Reply Textarea */}
-                  <textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Draft your reply or use AI Suggest..."
-                    className="w-full px-4 py-3 bg-card/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                    rows={4}
-                    autoFocus
-                  />
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={generateAISuggestion}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-primary/20 text-primary hover:bg-primary/30 transition-colors flex items-center gap-2"
-                      title="Use AI to suggest reply based on sentiment and context"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      AI Suggest
-                    </button>
-                    <button
-                      onClick={() => setReplyText('')}
-                      disabled={!replyText.trim()}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-accent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                      title="Clear and regenerate suggestion"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Regenerate
-                    </button>
-                    <button
-                      onClick={() => handleSendReply(idx)}
-                      disabled={!replyText.trim()}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                    >
-                      <Send className="w-4 h-4" />
-                      Post Reply
-                    </button>
-                  </div>
-                </div>
+              {expandedReplyId === mention.id && (
+                <InlineReplyBox
+                  mention={mention}
+                  onClose={handleCloseReply}
+                  onSend={handleSendReply}
+                />
               )}
             </div>
           ))

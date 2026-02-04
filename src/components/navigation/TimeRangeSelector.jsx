@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { dashboardService } from "../../api/dashboardService";
 
+// Set to true to enable debug logging
+const DEBUG_MODE = false;
+
 export default function TimeRangeSelector({
   dateRange,
   setDateRange,
@@ -19,28 +22,36 @@ export default function TimeRangeSelector({
 
   // Debug: Log component mount and dateRange changes
   useEffect(() => {
-    console.log("⏱️ TimeRangeSelector mounted/updated");
-    console.log("  dateRange:", dateRange);
-    console.log("  selectedEntity:", selectedEntity);
-    console.log("  entityType:", entityType);
+    if (DEBUG_MODE) {
+      console.log("⏱️ TimeRangeSelector mounted/updated");
+      console.log("  dateRange:", dateRange);
+      console.log("  selectedEntity:", selectedEntity);
+      console.log("  entityType:", entityType);
+    }
   }, [dateRange, selectedEntity, entityType]);
 
   // Handle radio change
   const handleRadioChange = (newValue) => {
-    console.log("📻 Radio changed to:", newValue);
+    if (DEBUG_MODE) {
+      console.log("📻 Radio changed to:", newValue);
+    }
     setDateRange(newValue);
   };
 
   // Fetch sentiment data when dateRange changes
   useEffect(() => {
-    console.log("🔄 Effect triggered - dateRange changed to:", dateRange);
+    if (DEBUG_MODE) {
+      console.log("🔄 Effect triggered - dateRange changed to:", dateRange);
+    }
 
     if (!selectedEntity?.id || !entityType || !dateRange) {
-      console.log("⚠️ Skipping API call - missing data:", {
-        hasEntity: !!selectedEntity?.id,
-        hasEntityType: !!entityType,
-        hasDateRange: !!dateRange,
-      });
+      if (DEBUG_MODE) {
+        console.log("⚠️ Skipping API call - missing data:", {
+          hasEntity: !!selectedEntity?.id,
+          hasEntityType: !!entityType,
+          hasDateRange: !!dateRange,
+        });
+      }
       return;
     }
 
@@ -51,11 +62,13 @@ export default function TimeRangeSelector({
         );
         const apiParam = selectedOption?.apiParam || "DAY";
 
-        console.log("📡 Fetching sentiment data with:", {
-          entityType,
-          entityId: selectedEntity.id,
-          period: apiParam,
-        });
+        if (DEBUG_MODE) {
+          console.log("📡 Fetching sentiment data with:", {
+            entityType,
+            entityId: selectedEntity.id,
+            period: apiParam,
+          });
+        }
 
         const response = await dashboardService.getSentimentOverTime(
           entityType,
@@ -63,7 +76,9 @@ export default function TimeRangeSelector({
           apiParam,
         );
 
-        console.log("✅ Sentiment data fetched:", response);
+        if (DEBUG_MODE) {
+          console.log("✅ Sentiment data fetched:", response);
+        }
 
         // Notify parent component about new data
         if (onSentimentDataFetched) {

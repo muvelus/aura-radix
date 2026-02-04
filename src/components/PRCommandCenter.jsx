@@ -165,15 +165,6 @@ export default function PRCommandCenter() {
       )}
 
       {/* Sentiment Analysis View */}
-      {activeView === 'sentiment-analysis' && (
-        <AnalyticsView 
-          mentions={filteredMentions}
-          metricsData={metricsData}
-          selectedEntity={selectedEntity}
-          entityType={entityType}
-        />
-      )}
-
       {/* AI Analytics View */}
       {activeView === 'ai-analytics' && (
         <AIAnalyticsView 
