@@ -148,7 +148,7 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
       {/* Generated Reply Section */}
       {generatedReply && (
         <div className="px-4 py-3">
-          <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide" id="generated-label">AI Generated Reply</div>
+          {/* <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide" id="generated-label">AI Generated Reply</div>
           <ScrollArea.Root className="h-max">
             <ScrollArea.Viewport className="max-h-[150px] rounded-lg border border-border bg-card/50 p-3" aria-labelledby="generated-label">
               <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">
@@ -158,7 +158,7 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
             <ScrollArea.Scrollbar orientation="vertical" className="w-2">
               <ScrollArea.Thumb className="bg-border rounded-full" />
             </ScrollArea.Scrollbar>
-          </ScrollArea.Root>
+          </ScrollArea.Root> */}
           
           {/* Generated Reply Actions */}
           <div className="flex items-center gap-2 mt-2">
@@ -248,22 +248,22 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
           <button
             onClick={handleAISuggest}
             disabled={isGenerating}
-            className="px-5 py-2.5 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors flex items-center gap-2 font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors flex items-center gap-2 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Get AI suggestion for reply"
             aria-busy={isGenerating}
             type="button"
           >
-            <Sparkles className="w-5 h-5" aria-hidden="true" />
+            <Sparkles className="w-4 h-4" aria-hidden="true" />
             AI Suggest
           </button>
           <button
             onClick={handlePost}
             disabled={isGenerating || !replyText.trim()}
-            className="px-8 py-3.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Post your reply"
             type="button"
           >
-            <Send className="w-5 h-5" aria-hidden="true" />
+            <Send className="w-4 h-4" aria-hidden="true" />
             Post Reply
           </button>
         </div>

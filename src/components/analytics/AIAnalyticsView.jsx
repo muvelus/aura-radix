@@ -19,7 +19,7 @@ export default function AIAnalyticsView({ selectedEntity, entityType }) {
           return;
         }
         const response = await analyticsService.getBoxOfficePrediction(movieId);
-        setBoxOfficePrediction(response.data);
+        setBoxOfficePrediction(response);
         setError(null);
       } catch (err) {
         console.error('Error fetching prediction:', err);
