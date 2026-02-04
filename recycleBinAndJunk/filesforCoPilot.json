@@ -1,0 +1,41 @@
+{
+    "content": [
+        {
+            "id": 3584,
+            "managedEntityId": 6,
+            "platform": "X",
+            "postId": "2018691749451882878",
+            "content": "RT @DoneChannel1: The part of history that you lived and loved on screen ❤️‍\uD83D\uDD25\n\nBlockbuster 25th day for #Parasakthi \uD83D\uDD25\n\n@siva_kartikeyan @Su…",
+            "author": null,
+            "postDate": "2026-02-03T19:53:13Z",
+            "sentiment": "NEGATIVE",
+            "permalink": "https://twitter.com/prince_sk1726/status/2018691749451882878",
+            "sentimentScore": 0
+        }
+    ],
+    "pageable": {
+        "pageNumber": 0,
+        "pageSize": 200,
+        "sort": {
+            "empty": false,
+            "sorted": true,
+            "unsorted": false
+        },
+        "offset": 0,
+        "paged": true,
+        "unpaged": false
+    },
+    "last": false,
+    "totalElements": 585,
+    "totalPages": 3,
+    "size": 200,
+    "number": 0,
+    "first": true,
+    "numberOfElements": 200,
+    "sort": {
+        "empty": false,
+        "sorted": true,
+        "unsorted": false
+    },
+    "empty": false
+}

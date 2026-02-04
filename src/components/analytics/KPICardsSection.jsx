@@ -3,6 +3,9 @@ import KPICard from './KPICard';
 import { TrendingUp } from 'lucide-react';
 import { Activity, MessageSquare, AlertTriangle, Users, Target } from 'lucide-react';
 
+// Debug mode - set to true to enable console logging
+const DEBUG_MODE = false;
+
 export default function KPICardsSection({ analytics }) {
   // Safety checks
   if (!analytics) {
@@ -10,7 +13,9 @@ export default function KPICardsSection({ analytics }) {
   }
 
   // Debug log to verify data structure
-  console.log('KPICardsSection received analytics:', analytics);
+  if (DEBUG_MODE) {
+    console.log('KPICardsSection received analytics:', analytics);
+  }
 
   // Determine overall sentiment (greatest of positive, negative, neutral)
   const sentiments = {

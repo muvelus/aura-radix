@@ -8,11 +8,17 @@ export default function PlatformBreakdownChart({ platformData = {} }) {
       return [];
     }
 
-    // Convert platform counts object to array
-    const data = Object.entries(platformData).map(([platform, count]) => ({
-      platform: platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase(), // Capitalize first letter
-      count: count
-    }));
+    // Convert platform data with sentiment breakdowns to array
+    const data = Object.entries(platformData).map(([platform, sentiments]) => {
+      const total = Object.values(sentiments).reduce((sum, val) => sum + val, 0);
+      return {
+        platform: platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase(),
+        POSITIVE: sentiments.POSITIVE || 0,
+        NEGATIVE: sentiments.NEGATIVE || 0,
+        NEUTRAL: sentiments.NEUTRAL || 0,
+        total: total
+      };
+    });
 
     return data;
   }, [platformData]);
@@ -23,7 +29,10 @@ export default function PlatformBreakdownChart({ platformData = {} }) {
       return (
         <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs space-y-1">
           <p className="text-white font-medium">{data.platform}</p>
-          <p className="text-primary">Mentions: {data.count}</p>
+          <p className="text-green-400">Positive: {data.POSITIVE}</p>
+          <p className="text-red-400">Negative: {data.NEGATIVE}</p>
+          <p className="text-yellow-400">Neutral: {data.NEUTRAL}</p>
+          <p className="text-blue-400 mt-2">Total: {data.total}</p>
         </div>
       );
     }
@@ -34,7 +43,7 @@ export default function PlatformBreakdownChart({ platformData = {} }) {
     <div className="bg-card border border-border rounded-lg p-5">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-foreground">Platform Breakdown</h3>
-        <p className="text-xs text-muted-foreground mt-1">Mentions by platform</p>
+        <p className="text-xs text-muted-foreground mt-1">Mentions by platform and sentiment</p>
       </div>
       
       {chartData.length > 0 ? (
@@ -52,7 +61,10 @@ export default function PlatformBreakdownChart({ platformData = {} }) {
               label={{ value: 'Count', angle: -90, position: 'insideLeft' }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="count" fill="#3b82f6" name="Mentions" radius={[8, 8, 0, 0]} />
+            <Legend />
+            <Bar dataKey="POSITIVE" fill="#22c55e" name="Positive" stackId="sentiment" />
+            <Bar dataKey="NEGATIVE" fill="#ef4444" name="Negative" stackId="sentiment" />
+            <Bar dataKey="NEUTRAL" fill="#eab308" name="Neutral" stackId="sentiment" />
           </BarChart>
         </ResponsiveContainer>
       ) : (

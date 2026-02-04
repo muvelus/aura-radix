@@ -10,6 +10,23 @@ import SentimentDistributionChart from "../analytics/SentimentDistributionChart"
 import PlatformBreakdownChart from "../analytics/PlatformBreakdownChart";
 import TimeRangeSelector from "../navigation/TimeRangeSelector";
 
+/**
+ * DashboardView Component
+ * Main analytics dashboard for displaying entity metrics, sentiment analysis, and social media insights.
+ * Supports both celebrity and movie entities with dynamic date range filtering.
+ * 
+ * @param {Object} selectedEntity - The currently selected entity (celebrity or movie)
+ * @param {string} entityType - Type of entity: 'celebrity' or 'movie'
+ * @param {Object} competitiveData - Competitive positioning data for the entity
+ * @param {Array} mentions - Array of social media mentions/posts
+ * @param {Object} platformData - Platform-specific sentiment breakdown (platform -> {POSITIVE, NEGATIVE, NEUTRAL})
+ * @param {Object} stats - Pre-calculated statistics for KPI cards
+ * @param {Array} sentimentData - Sentiment trend data over time
+ * @param {string} dateRange - Current date range filter value ('DAY', 'WEEK', 'MONTH')
+ * @param {Function} setDateRange - Setter for date range filter
+ * @param {Function} onMentionSelect - Callback when a mention is selected
+ * @param {Function} onRefresh - Callback to refresh data
+ */
 export default function DashboardView({
   selectedEntity,
   entityType,
@@ -26,6 +43,8 @@ export default function DashboardView({
   // Determine if we're showing celebrity or movie data
   const isCelebrity = entityType === "celebrity";
 
+  // Date range filtering options for sentiment analysis
+  // Each option defines: display label, day span for filtering, and API parameter
   const dateRangeOptions = [
     { value: "DAY", label: "Daily", days: 7, apiParam: "DAY" },
     { value: "WEEK", label: "Weekly", days: 14, apiParam: "WEEK" },
@@ -36,7 +55,9 @@ export default function DashboardView({
     dateRangeOptions.find((opt) => opt.value === dateRange) ||
     dateRangeOptions[0];
 
-  // Calculate key analytics metrics
+  // Calculate key analytics metrics from mentions data
+  // Includes sentiment breakdown, threat assessment, engagement calculations, and time-series data
+  // Memoized to prevent recalculation on every render
   const analytics = useMemo(() => {
     if (!mentions || mentions.length === 0) {
       return {
@@ -53,10 +74,9 @@ export default function DashboardView({
       };
     }
 
-    // Filter mentions based on date range
+    // Filter mentions based on selected date range to show only recent relevant data
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - selectedRange.days);
-
     const filteredMentions = mentions.filter((m) => m.timestamp >= cutoffDate);
 
     const totalMentions = filteredMentions.length;
@@ -82,13 +102,15 @@ export default function DashboardView({
     const avgEngagement =
       totalMentions > 0 ? Math.round(totalEngagement / totalMentions) : 0;
 
-    // Platform breakdown
+    // Aggregate mention counts by platform for distribution analysis
     const platformStats = filteredMentions.reduce((acc, m) => {
       acc[m.platform] = (acc[m.platform] || 0) + 1;
       return acc;
     }, {});
 
-    // Sentiment over time - dynamic buckets based on date range
+    // Create time-series sentiment data with dynamic bucket sizing
+    // Buckets are adjusted based on date range: 7 days = 7 buckets (daily), etc.
+    // This provides appropriate granularity for the selected time period
     const now = Date.now();
     const bucketCount =
       selectedRange.days <= 7
@@ -101,7 +123,8 @@ export default function DashboardView({
     const bucketSizeMs =
       (selectedRange.days * 24 * 60 * 60 * 1000) / bucketCount;
 
-    // Calculate time buckets from actual mentions data
+    // Build time-series data by grouping mentions into temporal buckets
+    // Each bucket contains sentiment counts and percentages for that time period
     const timeBuckets = Array.from({ length: bucketCount }, (_, i) => {
       const bucketEnd = now - i * bucketSizeMs;
       const bucketStart = bucketEnd - bucketSizeMs;
@@ -111,23 +134,28 @@ export default function DashboardView({
         return time >= bucketStart && time < bucketEnd;
       });
 
+      // Format time label based on date range for appropriate granularity
       let timeLabel;
       if (selectedRange.days <= 7) {
+        // Daily view: show day of week abbreviation
         timeLabel = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
           new Date(bucketEnd).getDay()
         ];
       } else if (selectedRange.days <= 14) {
+        // Weekly view: show month and day
         timeLabel = new Date(bucketEnd).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
         });
       } else {
+        // Monthly view: show month and day
         timeLabel = new Date(bucketEnd).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
         });
       }
 
+      // Count mentions by sentiment classification for this time bucket
       const positiveCount = bucketMentions.filter(
         (m) => m.aiSentiment === "positive",
       ).length;
@@ -139,6 +167,7 @@ export default function DashboardView({
       ).length;
       const total = bucketMentions.length;
 
+      // Calculate sentiment percentages to show proportional representation
       const positiveVal =
         total > 0 ? Math.round((positiveCount / total) * 100) : 0;
       const neutralVal =
@@ -168,7 +197,7 @@ export default function DashboardView({
       };
     }).reverse();
 
-    // Sentiment distribution for pie chart
+    // Prepare sentiment distribution data for pie/donut chart visualization
     const sentimentData = [
       {
         name: "Positive",
@@ -193,7 +222,7 @@ export default function DashboardView({
       },
     ];
 
-    // Platform distribution
+    // Prepare platform distribution data for bar chart visualization
     const platformData = [
       {
         platform: "Reddit",
@@ -221,6 +250,8 @@ export default function DashboardView({
     };
   }, [mentions, selectedRange, selectedEntity?.id]);
 
+  // Calculate overall sentiment score to provide a single aggregate metric
+  // Score ranges from 0-100 with labels: Positive (70+), Mixed (40-69), Negative (<40)
   const sentimentScore = useMemo(() => {
     if (analytics.totalMentions === 0)
       return { score: 50, label: "Neutral", color: "#eab308" };
@@ -283,21 +314,32 @@ export default function DashboardView({
         <KPICardsSection analytics={stats} />
 
         {/* Sentiment Trend Chart - Full Width */}
+        {/* Shows sentiment progression over time with stacked area chart */}
         <SentimentTrendChart sentimentData={sentimentData} />
 
-        {/* Competitor Snapshot */}
-        <CompetitivePositioning competitiveData={competitiveData} />
+        {/* 
+          Sentiment Distribution Chart (Disabled)
+          Commented out as the SentimentTrendChart provides sufficient sentiment visualization.
+          Can be re-enabled if pie chart comparison view is needed alongside trend data.
+        */}
+        {/* <SentimentDistributionChart sentimentData={analytics.sentimentData} /> */}
 
-        {/* Sentiment Distribution and Platform Breakdown - Side by Side */}
+
+        {/* Analytics Grid - 2 Column Layout */}
+        {/* Left: Competitive positioning analysis | Right: Platform sentiment breakdown */}
         <div className="grid grid-cols-2 gap-6">
-          <SentimentDistributionChart sentimentData={analytics.sentimentData} />
+          {/* Competitive Positioning Chart - Compares entity performance vs competitors */}
+          <CompetitivePositioning competitiveData={competitiveData} />
+          {/* Platform Breakdown Chart - Stacked bar chart showing sentiment distribution per platform */}
           <PlatformBreakdownChart platformData={platformData} />
         </div>
 
         {/* Social Media Feed - Full Width */}
+        {/* Displays recent mentions and posts from all platforms for selected entity */}
         <SocialMediaFeed mentions={mentions} selectedEntity={selectedEntity} />
 
-        {/* Celebrity Analytics if applicable */}
+        {/* Celebrity-Specific Analytics - Only rendered for celebrity entities */}
+        {/* Includes social reach, brand value, fan engagement, and controversy metrics */}
         {isCelebrity && <CelebrityAnalytics celebrityData={celebrityData} />}
       </div>
     </div>

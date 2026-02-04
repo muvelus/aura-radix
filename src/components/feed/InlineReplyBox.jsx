@@ -43,12 +43,12 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-sm font-semibold text-primary">
-              {mention.author.charAt(0).toUpperCase()}
+              {(mention.author || "U").charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <div className="text-sm font-semibold text-foreground">{mention.author}</div>
-            <div className="text-xs text-muted-foreground">@{mention.author.toLowerCase().replace(/\s+/g, '')}</div>
+            <div className="text-sm font-semibold text-foreground">{mention.author || "Unknown"}</div>
+            <div className="text-xs text-muted-foreground">@{(mention.author || "user").toLowerCase().replace(/\s+/g, '')}</div>
           </div>
         </div>
         <button

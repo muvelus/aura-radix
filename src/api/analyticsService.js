@@ -13,8 +13,9 @@ export const analyticsService = {
   // Query Params: date (ISO format, e.g., 2025-11-08)
   // Response: { date: string, trendingGenre: string }
   getTrendingGenre: async (date) => {
+    const isoDate = date instanceof Date ? date.toISOString() : date;
     return apiClient.get('/analytics/trending-genre', {
-      params: { date },
+      params: { date: isoDate },
     });
   },
 
@@ -30,8 +31,9 @@ export const analyticsService = {
   // Query Params: date (ISO format, e.g., 2025-11-08)
   // Response: { date: string, bestGenre: string }
   getBestGenre: async (date) => {
+    const isoDate = date instanceof Date ? date.toISOString() : date;
     return apiClient.get('/analytics/best-genre', {
-      params: { date },
+      params: { date: isoDate },
     });
   },
 
@@ -40,8 +42,9 @@ export const analyticsService = {
   // Query Params: date (ISO format, e.g., 2025-11-08)
   // Response: { date: string, topBoxOfficeMovie: string }
   getTopBoxOffice: async (date) => {
+    const isoDate = date instanceof Date ? date.toISOString() : date;
     return apiClient.get('/analytics/top-box-office', {
-      params: { date },
+      params: { date: isoDate },
     });
   },
 };

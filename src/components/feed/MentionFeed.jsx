@@ -21,12 +21,14 @@ const PLATFORM_LOGOS = {
   reddit: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/reddit.svg",
   youtube: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg",
   twitter: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/x.svg",
+  x: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/x.svg",
+  instagram: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg",
 };
 
 export default function MentionFeed({
   mentions,
   selectedMention,
-  onSelectMention,
+  onSelectMention = () => {},
 }) {
   const parentRef = useRef(null);
   const [replyingToId, setReplyingToId] = useState(null);
@@ -40,7 +42,7 @@ export default function MentionFeed({
   });
 
   const getPlatformIcon = (platform) => {
-    const logo = PLATFORM_LOGOS[platform];
+    const logo = PLATFORM_LOGOS[platform?.toLowerCase()];
     if (!logo)
       return <MessageSquare className="w-6 h-6 text-muted-foreground" />;
 
@@ -51,9 +53,9 @@ export default function MentionFeed({
         className="w-6 h-6"
         style={{
           filter:
-            platform === "reddit"
+            platform?.toLowerCase() === "reddit"
               ? "invert(42%) sepia(93%) saturate(6449%) hue-rotate(2deg) brightness(103%) contrast(101%)"
-              : platform === "youtube"
+              : platform?.toLowerCase() === "instagram"
                 ? "invert(35%) sepia(95%) saturate(5844%) hue-rotate(317deg) brightness(89%) contrast(92%)"
                 : "invert(100%)",
         }}
@@ -106,7 +108,13 @@ export default function MentionFeed({
                             ? "bg-primary/10"
                             : "hover:bg-accent/50"
                         }`}
-                        onClick={() => onSelectMention(mention)}
+                        onClick={() => {
+                          onSelectMention(mention);
+                          // Open permalink in new tab if available
+                          if (mention.permalink || mention.sourceUrl) {
+                            window.open(mention.permalink || mention.sourceUrl, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
                       >
                         <div className="flex items-start gap-3">
                           <div className="mt-1">
@@ -115,10 +123,10 @@ export default function MentionFeed({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-medium text-sm">
-                                {mention.author}
+                                {mention.author?.name || mention.author || "Unknown Author"}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {formatTimestamp(mention.timestamp)}
+                                {formatTimestamp(mention.timestamp || mention.postDate)}
                               </span>
                               {mention.isAnomaly && (
                                 <span className="px-1.5 py-0.5 text-xs bg-threat-critical/20 text-threat-critical rounded border border-threat-critical/50">
@@ -146,26 +154,34 @@ export default function MentionFeed({
                               </button>
                             </div>
                             <p className="text-sm text-foreground/90 line-clamp-2 mb-2">
-                              {mention.textSnippet}
+                              {mention.content || mention.textSnippet || "No content available"}
                             </p>
                             <div className="flex items-center gap-3">
+                              {/* Sentiment Badge */}
                               <span
-                                className={`text-xs px-2 py-0.5 rounded ${getSentimentBg(mention.aiSentiment)} capitalize`}
+                                className={`text-xs px-2 py-0.5 rounded ${getSentimentBg(mention.sentiment?.toLowerCase() || mention.aiSentiment?.toLowerCase())} capitalize`}
                               >
-                                {mention.aiSentiment}
+                                {(mention.sentiment || mention.aiSentiment || "unknown").toLowerCase()}
                               </span>
-                              <span
-                                className={`text-xs font-mono font-semibold ${getThreatColor(mention.aiThreatScore)}`}
-                              >
-                                Threat: {mention.aiThreatScore}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {mention.engagement?.likes || 0} ❤️{" "}
-                                {mention.engagement?.comments || 0} 💬
-                              </span>
-                              {mention.sourceUrl && (
+                              {/* Threat Score - Only show if available */}
+                              {(mention.aiThreatScore !== undefined || mention.threatScore !== undefined) && (
+                                <span
+                                  className={`text-xs font-mono font-semibold ${getThreatColor(mention.aiThreatScore || mention.threatScore || 0)}`}
+                                >
+                                  Threat: {mention.aiThreatScore || mention.threatScore}
+                                </span>
+                              )}
+                              {/* Engagement Metrics - Only show if available */}
+                              {mention.engagement && (
+                                <span className="text-xs text-muted-foreground">
+                                  {mention.engagement.likes || 0} ❤️{" "}
+                                  {mention.engagement.comments || 0} 💬
+                                </span>
+                              )}
+                              {/* Platform Link */}
+                              {(mention.permalink || mention.sourceUrl) && (
                                 <a
-                                  href={mention.sourceUrl}
+                                  href={mention.permalink || mention.sourceUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
