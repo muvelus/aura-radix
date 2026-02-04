@@ -21,7 +21,7 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
       const response = await interactionService.generateReply(mention.id);
       
       // Extract the generated reply from response
-      let suggestedReply = response.data?.generatedReply || response.data?.reply || response.data;
+      let suggestedReply = response.generatedReply;
       
       if (suggestedReply && typeof suggestedReply === 'string') {
         // Clean up the response - remove escaped quotes and trim whitespace
@@ -56,10 +56,7 @@ export default function InlineReplyBox({ mention, onClose, onSend }) {
       const response = await interactionService.generateReply(mention.id);
       
       // Extract the generated reply from response
-
-      console.log(response.data);
-
-      let regenerated = response.data?.generatedReply || response.data?.reply || response.data;
+      let regenerated = response?.generatedReply;
       
       if (regenerated && typeof regenerated === 'string') {
         // Clean up the response - remove escaped quotes and trim whitespace
