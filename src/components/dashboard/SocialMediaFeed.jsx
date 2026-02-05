@@ -304,7 +304,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
               </div>
 
               {/* Previous Replies */}
-              {replies[idx] && replies[idx].length > 0 && (
+              {/* {replies[idx] && replies[idx].length > 0 && (
                 <div className="space-y-2 pt-3 border-t border-border/50">
                   {replies[idx].map((reply) => (
                     <div key={reply.id} className="pl-4 border-l-2 border-primary/30">
@@ -318,7 +318,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
               </div>
 
               {/* Reply Box */}

@@ -58,7 +58,7 @@ export default function CrisisFocusView({ mentions, selectedMention, onSelectMen
               {negativePosts.length} negative mentions • Real-time monitoring
             </div>
           </div>
-          {negativePosts.length > 0 && (
+          {/* {negativePosts.length > 0 && (
             <button
               onClick={() => setCrisisModalOpen(true)}
               className="flex items-center gap-2 px-3 py-2 bg-threat-critical/10 hover:bg-threat-critical/20 text-threat-critical rounded-md transition-colors border border-threat-critical/30"
@@ -69,7 +69,7 @@ export default function CrisisFocusView({ mentions, selectedMention, onSelectMen
                 <div className="text-xs opacity-70">Click to review</div>
               </div>
             </button>
-          )}
+          )} */}
         </div>
       </div>
 
