@@ -42,7 +42,8 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
       narrative: 'N/A',
       engagement: { likes: 0, comments: 0, shares: 0 },
       aiThreatScore: 0,
-      isRealComment: true
+      isRealComment: true,
+      permalink: mention.permaLink
     }));
   }, [mentions]);
 
@@ -169,6 +170,12 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const handleOpenPost = (permalink) => {
+    if (permalink) {
+      window.open(permalink, '_blank');
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -271,7 +278,12 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
               </div>
 
               {/* Post Content */}
-              <p className="text-sm text-foreground leading-relaxed line-clamp-3">{mention.text}</p>
+              <p 
+                onClick={() => handleOpenPost(mention.permalink)}
+                className="text-sm text-foreground leading-relaxed line-clamp-3 cursor-pointer hover:text-primary transition-colors"
+              >
+                {mention.text}
+              </p>
 
               {/* Engagement Stats & Reply Button */}
               <div className="flex items-center justify-between pt-3 border-t border-border/50">
@@ -310,7 +322,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
               </div>
 
               {/* Reply Box */}
-              {expandedReplyId === mention.id && (
+              {expandedReplyId === idx && (
                 <InlineReplyBox
                   mention={mention}
                   onClose={handleCloseReply}

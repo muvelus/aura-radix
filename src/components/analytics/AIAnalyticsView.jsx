@@ -84,14 +84,14 @@ export default function AIAnalyticsView({ selectedEntity, entityType }) {
       {/* Content */}
       <div className="p-6 space-y-6">
         {/* Market Verdict Card */}
-        <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-lg p-6">
+        {/* <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold text-foreground">Market Verdict</h3>
             <span className="px-6 py-3 bg-emerald-500/20 text-emerald-400 rounded-lg font-bold text-xl">
               {pred.market_verdict || 'N/A'}
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Prediction Metadata */}
         {pred.prediction_metadata && (
