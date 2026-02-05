@@ -180,7 +180,7 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
         </div>
 
         {/* Top Negative Platforms */}
-        <div className="bg-card border border-border rounded-xl p-6">
+        {/* <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4">Negative Comments by Platform</h3>
           <div className="space-y-4">
             {themes.map((theme, idx) => (
@@ -205,7 +205,7 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
                   </div>
                 </div>
 
-                {/* All Comments */}
+                
                 <div className="ml-11 space-y-2">
                   {getAllComments(theme.theme).map((comment, commentIdx) => (
                     <div 
@@ -230,10 +230,10 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* AI-Recommended Response Approaches */}
-        <div className="bg-card border border-border rounded-xl p-6">
+        {/* <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <Lightbulb className="w-5 h-5 text-primary" />
             <h3 className="text-sm font-semibold text-foreground">AI-Recommended Response Strategy</h3>
@@ -261,7 +261,7 @@ export default function NegativeCommentSummary({ mentions: mentionsProps, select
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
