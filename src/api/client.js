@@ -2,7 +2,77 @@ import axios from 'axios';
 
 const API_BASE_URL = '/api';
 
-// Create axios instance
+/**
+ * Configuration for public endpoints that don't require authentication
+ * Add endpoints here that should be accessible without a JWT token
+ */
+const PUBLIC_ENDPOINTS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/health', // health check endpoint
+];
+
+/**
+ * Check if an endpoint is public (doesn't require auth)
+ */
+const isPublicEndpoint = (url) => {
+  return PUBLIC_ENDPOINTS.some(endpoint => url.includes(endpoint));
+};
+
+/**
+ * Create authenticated API client with JWT token
+ * Used for all protected API routes
+ */
+const createAuthenticatedClient = () => {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 15000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // Add JWT token to every authenticated request
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('jwtToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.warn('No JWT token found. Redirecting to login.');
+        window.location.href = '/login';
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  return client;
+};
+
+/**
+ * Create public API client without authentication
+ * Used for login, register, and other public endpoints
+ */
+const createPublicClient = () => {
+  return axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 15000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+// Create both client instances
+const publicApiClient = createPublicClient();
+const authenticatedApiClient = createAuthenticatedClient();
+
+/**
+ * Universal API client that routes to appropriate client
+ * Automatically uses public client for public endpoints, authenticated for protected ones
+ */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
@@ -11,12 +81,14 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor - Add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only add auth token for protected endpoints
+    if (!isPublicEndpoint(config.url)) {
+      const token = localStorage.getItem('jwtToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -27,49 +99,125 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Handle specific error codes
+    // Handle network errors (no response from server)
+    if (!error.response) {
+      if (error.code === 'ECONNABORTED') {
+        return Promise.reject({
+          status: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          isNetworkError: true,
+        });
+      }
+      
+      if (error.message === 'Network Error') {
+        return Promise.reject({
+          status: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          isNetworkError: true,
+        });
+      }
+
+      return Promise.reject({
+        status: 'UNKNOWN_ERROR',
+        message: error.message || 'An unexpected error occurred',
+        isNetworkError: true,
+      });
+    }
+
+    // Handle HTTP error responses
     const status = error.response?.status;
     const errorData = error.response?.data;
 
+    // 400 - Bad Request
+    if (status === 400) {
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'Invalid request',
+        errors: errorData?.errors,
+        data: errorData,
+      });
+    }
+
+    // 401 - Unauthorized (token expired or invalid)
     if (status === 401) {
-      // Unauthorized - token expired or invalid
       localStorage.removeItem('jwtToken');
       window.location.href = '/login';
+      return Promise.reject({
+        status,
+        message: 'Session expired. Please login again.',
+        errors: errorData?.errors,
+        data: errorData,
+      });
     }
 
+    // 403 - Forbidden (user lacks permissions)
     if (status === 403) {
-      // Forbidden - user lacks permissions
-      console.warn('Access forbidden');
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'You do not have permission to access this resource',
+        errors: errorData?.errors,
+        data: errorData,
+      });
     }
 
+    // 404 - Not Found
     if (status === 404) {
-      // Not found
-      console.warn('Resource not found');
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'Resource not found',
+        errors: errorData?.errors,
+        data: errorData,
+      });
     }
 
+    // 422 - Unprocessable Entity (validation errors)
     if (status === 422) {
-      // Validation error
-      console.warn('Validation error:', errorData?.errors);
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'Validation failed',
+        errors: errorData?.errors,
+        data: errorData,
+        isValidationError: true,
+      });
     }
 
+    // 429 - Too Many Requests (rate limited)
     if (status === 429) {
-      // Rate limited - implement retry logic
-      console.warn('Rate limited, please try again later');
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'Too many requests. Please try again later.',
+        retryAfter: error.response?.headers?.['retry-after'],
+        data: errorData,
+      });
     }
 
+    // 500+ - Server errors
     if (status >= 500) {
-      // Server error
-      console.error('Server error:', errorData?.message);
+      return Promise.reject({
+        status,
+        message: errorData?.message || 'Server error. Please try again later.',
+        errors: errorData?.errors,
+        data: errorData,
+        isServerError: true,
+      });
     }
 
-    // Return structured error for component handling
+    // Default error handling for other status codes
     return Promise.reject({
       status,
-      message: errorData?.message || error.message,
+      message: errorData?.message || error.message || 'An error occurred',
       errors: errorData?.errors,
       data: errorData,
     });
   }
 );
 
+/**
+ * Export both specialized clients and the universal client
+ * Use Cases:
+ * - apiClient: Default for most requests (auto-routes public/authenticated)
+ * - publicApiClient: Explicitly for public endpoints when needed
+ * - authenticatedApiClient: Explicitly for protected endpoints when needed
+ */
 export default apiClient;
+export { publicApiClient, authenticatedApiClient };
