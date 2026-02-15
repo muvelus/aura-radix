@@ -145,7 +145,7 @@ export default function LoginModal({ open, onOpenChange, onLoginSuccess }) {
 
               {/* Info text */}
               <p className="text-xs text-muted-foreground text-center">
-                Demo credentials: newuser / password123
+                Demo credentials: jason1 / password1234
               </p>
             </form>
           )}

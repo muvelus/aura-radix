@@ -5,14 +5,26 @@ export const entityService = {
   // Path: GET /api/entities/{entityType}
   // Response: Array of entities
   getAll: async (entityType = 'movie') => {
-    return apiClient.get(`/entities/${entityType}`);
+    try {
+      const response = await apiClient.get(`/entities/${entityType}`);
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch all entities of type ${entityType}:`, error);
+      throw error;
+    }
   },
 
   // Get specific entity details by ID
   // Path: GET /api/entities/{entityType}/{id}
   // Response: Entity with full details including competitors
   getById: async (entityId, entityType = 'movie') => {
-    return apiClient.get(`/entities/${entityType}/${entityId}`);
+    try {
+      const response = await apiClient.get(`/entities/${entityType}/${entityId}`);
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch entity ${entityId} of type ${entityType}:`, error);
+      throw error;
+    }
   },
 
   // Create new managed entity
@@ -20,7 +32,13 @@ export const entityService = {
   // Request: { name, type, director?, actors?, keywords? }
   // Response: Created entity object
   create: async (entityType = 'movie', entityData) => {
-    return apiClient.post(`/entities/${entityType}`, entityData);
+    try {
+      const response = await apiClient.post(`/entities/${entityType}`, entityData);
+      return response;
+    } catch (error) {
+      console.error(`Failed to create entity of type ${entityType}:`, error);
+      throw error;
+    }
   },
 
   // Update entity competitors list
@@ -28,9 +46,15 @@ export const entityService = {
   // Request: { competitorIds: number[] }
   // Response: Updated entity with competitors
   updateCompetitors: async (entityType, entityId, competitorIds) => {
-    return apiClient.put(`/entities/${entityType}/${entityId}/competitors`, { 
-      competitorIds 
-    });
+    try {
+      const response = await apiClient.put(`/entities/${entityType}/${entityId}/competitors`, { 
+        competitorIds 
+      });
+      return response;
+    } catch (error) {
+      console.error(`Failed to update competitors for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Update entity keywords
@@ -38,15 +62,27 @@ export const entityService = {
   // Request: { keywords: string[] }
   // Response: Updated entity with new keywords
   updateKeywords: async (entityType, entityId, keywords) => {
-    return apiClient.put(`/entities/${entityType}/${entityId}/keywords`, { 
-      keywords 
-    });
+    try {
+      const response = await apiClient.put(`/entities/${entityType}/${entityId}/keywords`, { 
+        keywords 
+      });
+      return response;
+    } catch (error) {
+      console.error(`Failed to update keywords for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Delete an entity
   // Path: DELETE /api/entities/{entityType}/{id}
   // Response: No content (204)
   delete: async (entityType, entityId) => {
-    return apiClient.delete(`/entities/${entityType}/${entityId}`);
+    try {
+      const response = await apiClient.delete(`/entities/${entityType}/${entityId}`);
+      return response;
+    } catch (error) {
+      console.error(`Failed to delete entity ${entityId} of type ${entityType}:`, error);
+      throw error;
+    }
   },
 };

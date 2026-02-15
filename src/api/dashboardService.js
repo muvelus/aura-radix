@@ -5,18 +5,30 @@ export const dashboardService = {
   // Path: GET /api/dashboard/{entityType}/{entityId}/stats
   // Response: { totalMentions, positiveSentiment, negativeSentiment }
   getStats: async (entityType, entityId) => {
-    return apiClient.get(
-      `/dashboard/${entityType}/${entityId}/stats`
-    );
+    try {
+      const response = await apiClient.get(
+        `/dashboard/${entityType}/${entityId}/stats`
+      );
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch stats for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Get competitor comparison snapshot (entity + competitors stats)
   // Path: GET /api/dashboard/{entityType}/{entityId}/competitor-snapshot
   // Response: Array of { entityName, totalMentions, positiveSentiment }
   getCompetitorSnapshot: async (entityType, entityId) => {
-    return apiClient.get(
-      `/dashboard/${entityType}/${entityId}/competitor-snapshot`
-    );
+    try {
+      const response = await apiClient.get(
+        `/dashboard/${entityType}/${entityId}/competitor-snapshot`
+      );
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch competitor snapshot for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Get sentiment data over time for trend analysis
@@ -24,22 +36,34 @@ export const dashboardService = {
   // Query Params: period (DAY|WEEK|MONTH), entityIds (comma-separated)
   // Response: { entities: [{ name, sentiments: [{ date, positive, negative, neutral }] }] }
   getSentimentOverTime: async (entityType, entityId, period = 'DAY', entityIds = []) => {
-    const entityIdParam = entityIds.length > 0 
-      ? (Array.isArray(entityIds) ? entityIds.join(',') : entityIds)
-      : entityId;
-    return apiClient.get(
-      `/dashboard/${entityType}/${entityId}/sentiment-over-time`,
-      { params: { period, entityIds: entityIdParam } }
-    );
+    try {
+      const entityIdParam = entityIds.length > 0 
+        ? (Array.isArray(entityIds) ? entityIds.join(',') : entityIds)
+        : entityId;
+      const response = await apiClient.get(
+        `/dashboard/${entityType}/${entityId}/sentiment-over-time`,
+        { params: { period, entityIds: entityIdParam } }
+      );
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch sentiment over time for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Get platform breakdown (mentions by platform)
   // Path: GET /api/dashboard/{entityType}/{entityId}/platform-mentions
   // Response: { X: number, REDDIT: number, YOUTUBE: number, INSTAGRAM: number }
   getPlatformMentions: async (entityType, entityId) => {
-    return apiClient.get(
-      `/dashboard/${entityType}/${entityId}/platform-mentions`
-    );
+    try {
+      const response = await apiClient.get(
+        `/dashboard/${entityType}/${entityId}/platform-mentions`
+      );
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch platform mentions for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 
   // Get filtered mentions with pagination
@@ -47,14 +71,20 @@ export const dashboardService = {
   // Query Params: platform?, page (default: 0), size (default: 10)
   // Response: { content: Mention[], pageable, totalElements, totalPages, last }
   getMentions: async (entityType, entityId, filters = {}) => {
-    const params = {
-      page: filters.page || 0,
-      size: filters.size || 200,
-      ...(filters.platform && { platform: filters.platform }),
-    };
-    return apiClient.get(
-      `/dashboard/${entityType}/${entityId}/mentions`,
-      { params }
-    );
+    try {
+      const params = {
+        page: filters.page || 0,
+        size: filters.size || 200,
+        ...(filters.platform && { platform: filters.platform }),
+      };
+      const response = await apiClient.get(
+        `/dashboard/${entityType}/${entityId}/mentions`,
+        { params }
+      );
+      return response;
+    } catch (error) {
+      console.error(`Failed to fetch mentions for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 };

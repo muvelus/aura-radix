@@ -5,28 +5,52 @@ export const authService = {
   // Request: { username: string, password: string }
   // Response: "User registered successfully"
   register: async (username, password) => {
-    return apiClient.post('/auth/register', { username, password });
+    try {
+      const response = await apiClient.post('/auth/register', { username, password });
+      return response;
+    } catch (error) {
+      console.error('Failed to register user:', error);
+      throw error;
+    }
   },
 
   // Login and get JWT token
   // Request: { username: string, password: string }
   // Response: { jwtToken: string }
   login: async (username, password) => {
-    const response = await apiClient.post('/auth/login', { username, password });
-    // Store token in localStorage for subsequent requests
-    if (response.jwtToken) {
+    try {
+      const response = await apiClient.post('/auth/login', { username, password });
+      // Validate response format
+      if (!response?.jwtToken) {
+        throw new Error('Invalid response format: missing jwtToken');
+      }
+      // Store token in localStorage for subsequent requests
       localStorage.setItem('jwtToken', response.jwtToken);
+      return response;
+    } catch (error) {
+      console.error('Failed to login user:', error);
+      throw error;
     }
-    return response;
   },
 
   logout: () => {
-    localStorage.removeItem('jwtToken');
+    try {
+      localStorage.removeItem('jwtToken');
+    } catch (error) {
+      console.error('Failed to logout user:', error);
+      throw error;
+    }
   },
 
   // Get current user profile
   // Response: User profile object
   getCurrentUser: async () => {
-    return apiClient.get('/auth/profile');
+    try {
+      const response = await apiClient.get('/auth/profile');
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch current user profile:', error);
+      throw error;
+    }
   },
 };

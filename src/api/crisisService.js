@@ -6,9 +6,15 @@ export const crisisService = {
   // Request: { entityId: number, crisisDescription: string }
   // Response: { generatedPlan: string }
   generatePlan: async (entityId, crisisDescription) => {
-    return apiClient.post('/crisis/generate-plan', {
-      entityId,
-      crisisDescription,
-    });
+    try {
+      const response = await apiClient.post('/crisis/generate-plan', {
+        entityId,
+        crisisDescription,
+      });
+      return response;
+    } catch (error) {
+      console.error(`Failed to generate crisis plan for entity ${entityId}:`, error);
+      throw error;
+    }
   },
 };
