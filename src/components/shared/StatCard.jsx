@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Skeleton } from '@radix-ui/themes';
+import { HelpCircle, InfoIcon } from 'lucide-react';
 
 /**
  * Reusable StatCard component for displaying metric cards
@@ -13,6 +14,7 @@ import { Skeleton } from '@radix-ui/themes';
  * @param {'green'|'purple'|'blue'|'orange'|'red'} props.color - Color theme
  * @param {number} props.trend - Trend percentage (e.g., +5, -2)
  * @param {boolean} props.isLoading - Loading state
+ * @param {string} props.tooltip - Tooltip text for additional context
  * @param {string} props.className - Additional CSS classes
  */
 export function StatCard({
@@ -22,8 +24,11 @@ export function StatCard({
   color = 'green',
   trend,
   isLoading = false,
+  tooltip,
   className = '',
 }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const colorClasses = {
     green: 'bg-green-500/10 border-green-500/20 text-green-500',
     purple: 'bg-purple-500/10 border-purple-500/20 text-purple-500',
@@ -52,6 +57,26 @@ export function StatCard({
           <p className="text-xs text-muted-foreground uppercase font-semibold">
             {label}
           </p>
+          {tooltip && (
+            <div className="relative">
+              <button
+                className="ml-1 inline-flex items-center justify-center"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+                onFocus={() => setShowTooltip(true)}
+                onBlur={() => setShowTooltip(false)}
+                aria-label={`Help: ${tooltip}`}
+                type="button"
+              >
+                <InfoIcon  className="w-3 h-3 text-muted-foreground hover:text-foreground transition-colors" />
+              </button>
+              {showTooltip && (
+                <div className="absolute left-0 top-full mt-1 z-50 w-48 bg-background border border-border rounded-lg p-2 text-xs text-muted-foreground shadow-lg">
+                  {tooltip}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {trend !== undefined && !isLoading && (
           <span

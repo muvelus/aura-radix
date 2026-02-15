@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { celebrityAnalytics, movies } from "../../dummydata";
+import { transformStatsToCards, calculateStatsFromMentions } from "../../utils/statsTransformer";
 import CelebrityAnalytics from "./CelebrityAnalytics";
 import CompetitivePositioning from "./CompetitivePositioning";
 import SocialMediaFeed from "./SocialMediaFeed";
@@ -311,7 +312,7 @@ export default function DashboardView({
         />
 
         {/* KPI Cards */}
-        <KPICardsSection analytics={stats} />
+        <KPICardsSection analytics={transformStatsToCards(stats) || transformStatsToCards(calculateStatsFromMentions(mentions))} />
 
         {/* Sentiment Trend Chart - Full Width */}
         {/* Shows sentiment progression over time with stacked area chart */}

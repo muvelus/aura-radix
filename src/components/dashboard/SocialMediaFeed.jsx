@@ -43,7 +43,7 @@ export default function SocialMediaFeed({ mentions, selectedEntity }) {
       engagement: { likes: 0, comments: 0, shares: 0 },
       aiThreatScore: 0,
       isRealComment: true,
-      permalink: mention.permaLink
+      permalink: mention.permalink
     }));
   }, [mentions]);
 

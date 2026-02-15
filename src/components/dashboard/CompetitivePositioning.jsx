@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, MessageSquare, TrendingUp } from 'lucide-react';
+import { Target, MessageSquare, TrendingUp, Zap } from 'lucide-react';
 
 export default function CompetitivePositioning({ competitiveData = [] }) {
   const formatMentions = (count) => {
@@ -7,8 +7,13 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
     return count.toString();
   };
 
-  const formatSentiment = (value) => {
-    return Math.round(value * 100);
+  const formatPercentage = (value) => {
+    // If value is already a ratio (0-1), multiply by 100
+    if (value <= 1) {
+      return Math.round(value * 100);
+    }
+    // If value is already a percentage (0-100), round it
+    return Math.round(value);
   };
 
   return (
@@ -24,7 +29,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
           competitiveData.map((competitor, idx) => (
             <div 
               key={idx}
-              className="flex-1 min-w-[200px] p-4 bg-accent/30 border border-border rounded-lg hover:border-primary/50 transition-colors"
+              className="flex-1 min-w-[240px] p-4 bg-accent/30 border border-border rounded-lg hover:border-primary/50 transition-colors"
             >
               {/* Competitor Name */}
               <h4 className="text-sm font-semibold text-primary mb-4">
@@ -44,24 +49,50 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                 </div>
               </div>
 
-              {/* Sentiment */}
-              <div className="space-y-2">
+              {/* Sentiment Metrics */}
+              <div className="space-y-4">
+                {/* Overall Sentiment */}
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
-                    Positive Sentiment
+                    Overall Sentiment
                   </span>
-                  <span className="text-sm font-semibold text-green-500">
-                    {formatSentiment(competitor.positiveSentiment)}%
+                  <span className="text-sm font-semibold text-blue-500">
+                    {formatPercentage(competitor.overallSentiment)}%
                   </span>
                 </div>
-                
-                {/* Sentiment Bar */}
-                <div className="h-2 bg-background rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500 transition-all"
-                    style={{ width: `${formatSentiment(competitor.positiveSentiment)}%` }}
-                  />
+
+                {/* Positive Ratio Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      Positive Ratio
+                    </span>
+                    <span className="text-sm font-semibold text-green-500">
+                      {formatPercentage(competitor.positiveRatio)}%
+                    </span>
+                  </div>
+                  
+                  {/* Positive Ratio Bar */}
+                  <div className="h-2 bg-background rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-green-500 transition-all"
+                      style={{ width: `${formatPercentage(competitor.positiveRatio)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Net Sentiment Score */}
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    Net Sentiment
+                  </span>
+                  <span className={`text-sm font-semibold ${
+                    competitor.netSentimentScore > 0 ? 'text-green-500' : competitor.netSentimentScore < 0 ? 'text-red-500' : 'text-yellow-500'
+                  }`}>
+                    {competitor.netSentimentScore.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>

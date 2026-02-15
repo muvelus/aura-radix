@@ -32,8 +32,15 @@ export default function EntitySelector({ selectedEntity, onEntityChange, entitie
         </Select.Icon>
       </Select.Trigger>
 
-      <Select.Portal>
-        <Select.Content className="overflow-hidden bg-card rounded-lg border border-border shadow-lg w-[400px] z-[100]">
+      <Select.Portal container={document.body}>
+        <Select.Content 
+          className="overflow-hidden bg-card rounded-lg border border-border shadow-lg w-[400px] z-[999]"
+          side="bottom"
+          align="start"
+          sideOffset={8}
+          avoidCollisions={true}
+          forceMount={false}
+        >
           <div className="p-2 border-b border-border">
             <div className="flex items-center gap-2 px-2 py-1.5 bg-background rounded">
               <Search className="w-4 h-4 text-muted-foreground" />

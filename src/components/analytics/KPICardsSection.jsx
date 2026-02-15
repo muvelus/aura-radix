@@ -1,7 +1,8 @@
 import React from 'react';
 import KPICard from './KPICard';
+import { StatCard } from '../shared';
 import { TrendingUp } from 'lucide-react';
-import { Activity, MessageSquare, AlertTriangle, Users, Target } from 'lucide-react';
+import { Activity, MessageSquare, AlertTriangle, Users, Target, Zap } from 'lucide-react';
 
 // Debug mode - set to true to enable console logging
 const DEBUG_MODE = false;
@@ -17,7 +18,25 @@ export default function KPICardsSection({ analytics }) {
     console.log('KPICardsSection received analytics:', analytics);
   }
 
-  // Determine overall sentiment (greatest of positive, negative, neutral)
+  // Check if analytics is an array of stat cards (new format from transformStatsToCards)
+  if (Array.isArray(analytics) && analytics.length > 0 && analytics[0]?.icon) {
+    return (
+      <div className="grid grid-cols-4 gap-4 p-6 border-b border-border bg-card">
+        {analytics.map((stat, idx) => (
+          <StatCard
+            key={idx}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            color={stat.color}
+            tooltip={stat.tooltip}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Fallback to old format for backwards compatibility
   const sentiments = {
     positive: analytics.positiveSentiment || 0,
     negative: analytics.negativeSentiment || 0,
