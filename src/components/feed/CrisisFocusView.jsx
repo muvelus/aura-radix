@@ -74,7 +74,7 @@ export default function CrisisFocusView({ mentions, selectedMention, onSelectMen
       </div>
 
       <MentionFeed
-        mentions={mentions}
+        mentions={negativePosts}
         selectedMention={selectedMention}
         onSelectMention={onSelectMention}
       />

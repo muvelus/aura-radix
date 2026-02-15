@@ -15,7 +15,7 @@ export default function EnhancedMetricsDashboard({
   
   const totalMentions = mentions.length;
   const highRiskMentions = mentions.filter(m => m.aiThreatScore >= 60).length;
-  const crisisMentions = mentions.filter(m => m.aiThreatScore >= 85).length;
+  const crisisMentions = mentions.filter(m => m.aiThreatScore >= 85 && m.aiSentiment === 'NEGATIVE').length;
   
   // Calculate velocity
   const recentMentions = mentions.filter(m => 
