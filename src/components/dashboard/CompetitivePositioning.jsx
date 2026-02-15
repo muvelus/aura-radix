@@ -16,6 +16,26 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
     return Math.round(value);
   };
 
+  const getPositiveRatioColor = (ratio) => {
+    const percentage = ratio <= 1 ? ratio * 100 : ratio;
+    if (percentage >= 60) return 'text-green-500';
+    if (percentage >= 40) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
+  const getPositiveRatioBarColor = (ratio) => {
+    const percentage = ratio <= 1 ? ratio * 100 : ratio;
+    if (percentage >= 60) return 'bg-green-500';
+    if (percentage >= 40) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getNetSentimentColor = (score) => {
+    if (score > 1.5) return 'text-green-500';
+    if (score >= 1.0) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -69,7 +89,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                       <Zap className="w-3 h-3" />
                       Positive Ratio
                     </span>
-                    <span className="text-sm font-semibold text-green-500">
+                    <span className={`text-sm font-semibold ${getPositiveRatioColor(competitor.positiveRatio)}`}>
                       {formatPercentage(competitor.positiveRatio)}%
                     </span>
                   </div>
@@ -77,7 +97,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                   {/* Positive Ratio Bar */}
                   <div className="h-2 bg-background rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-green-500 transition-all"
+                      className={`h-full ${getPositiveRatioBarColor(competitor.positiveRatio)} transition-all`}
                       style={{ width: `${formatPercentage(competitor.positiveRatio)}%` }}
                     />
                   </div>
@@ -88,9 +108,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     Net Sentiment
                   </span>
-                  <span className={`text-sm font-semibold ${
-                    competitor.netSentimentScore > 0 ? 'text-green-500' : competitor.netSentimentScore < 0 ? 'text-red-500' : 'text-yellow-500'
-                  }`}>
+                  <span className={`text-sm font-semibold ${getNetSentimentColor(competitor.netSentimentScore)}`}>
                     {competitor.netSentimentScore.toFixed(2)}
                   </span>
                 </div>
