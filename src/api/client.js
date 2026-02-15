@@ -27,7 +27,7 @@ const isPublicEndpoint = (url) => {
 const createAuthenticatedClient = () => {
   const client = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 15000,
+    timeout: 25000,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -58,7 +58,7 @@ const createAuthenticatedClient = () => {
 const createPublicClient = () => {
   return axios.create({
     baseURL: API_BASE_URL,
-    timeout: 15000,
+    timeout: 25000,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -75,7 +75,7 @@ const authenticatedApiClient = createAuthenticatedClient();
  */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
   },
