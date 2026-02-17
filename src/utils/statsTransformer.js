@@ -1,4 +1,4 @@
-import { TrendingUp, Zap, Smile, BarChart3 } from 'lucide-react';
+import { TrendingUp, Zap, Smile, BarChart3 } from "lucide-react";
 
 /**
  * Transform API stats response to StatCard format
@@ -18,31 +18,40 @@ export function transformStatsToCards(statsResponse) {
   return [
     {
       icon: BarChart3,
-      label: 'Total Mentions',
+      label: "Total Mentions",
       value: totalMentions.toLocaleString(),
-      color: 'blue',
-      tooltip: 'Total number of mentions across all platforms',
+      color: "blue",
+      tooltip: "Total number of mentions across all platforms",
     },
     {
       icon: Smile,
-      label: 'Overall Sentiment',
+      label: "Overall Sentiment",
       value: `${overallSentiment.toFixed(1)}%`,
-      color: 'green',
-      tooltip: 'Overall sentiment score across all mentions',
+      color: "green",
+      tooltip: "Overall sentiment score across all mentions",
     },
     {
       icon: TrendingUp,
-      label: 'Positive Ratio',
+      label: "Positive Ratio",
       value: `${(positiveRatio * 100).toFixed(1)}%`,
-      color: 'purple',
-      tooltip: 'Percentage of positive comments from total mentions. Higher is better.',
+      color: "purple",
+      tooltip:
+        "Percentage of positive comments from total mentions. Higher is better.",
     },
     {
       icon: Zap,
-      label: 'Net Sentiment Score',
+      label: "Net Sentiment Score",
       value: netSentimentScore.toFixed(2),
-      color: netSentimentScore > 0 ? 'green' : netSentimentScore < 0 ? 'red' : 'orange',
-      tooltip: 'Ratio of positive comments to negative comments. Higher is better.',
+      color:
+        netSentimentScore > 0
+          ? "green"
+          : netSentimentScore < 0
+            ? "red"
+            : "orange",
+      tooltip:
+        "Net sentiment score indicates that there are " +
+        netSentimentScore +
+        " positive posts for one negative post. Higher is better.",
     },
   ];
 }
@@ -64,15 +73,15 @@ export function calculateStatsFromMentions(mentions) {
   }
 
   const totalMentions = mentions.length;
-  const positive = mentions.filter((m) => m.aiSentiment === 'positive').length;
-  const negative = mentions.filter((m) => m.aiSentiment === 'negative').length;
-  const neutral = mentions.filter((m) => m.aiSentiment === 'neutral').length;
+  const positive = mentions.filter((m) => m.aiSentiment === "positive").length;
+  const negative = mentions.filter((m) => m.aiSentiment === "negative").length;
+  const neutral = mentions.filter((m) => m.aiSentiment === "neutral").length;
 
   const positiveRatio = totalMentions > 0 ? positive / totalMentions : 0;
   const negativeRatio = totalMentions > 0 ? negative / totalMentions : 0;
 
   // Overall sentiment: positive - negative (normalized to 0-100)
-  const overallSentiment = ((positiveRatio - negativeRatio) * 50) + 50;
+  const overallSentiment = (positiveRatio - negativeRatio) * 50 + 50;
 
   // Net sentiment score: positive count - negative count
   const netSentimentScore = positive - negative;
