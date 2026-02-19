@@ -1,7 +1,27 @@
-import React from 'react';
-import { Target, MessageSquare, TrendingUp, Zap } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Target, MessageSquare, TrendingUp, Zap, Plus, X } from 'lucide-react';
 
-export default function CompetitivePositioning({ competitiveData = [] }) {
+export default function CompetitivePositioning({ competitiveData = [], entities = [], onAddCompetitor = null }) {
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedEntities, setSelectedEntities] = useState([]);
+
+  // Filter entities to exclude already added competitors
+  const availableEntities = useMemo(() => {
+    const competitorIds = new Set(competitiveData.map(c => c.id));
+    return entities.filter(entity => !competitorIds.has(entity.id));
+  }, [entities, competitiveData]);
+
+  // Handle tag selection for multi-select
+  const handleSelectEntity = (entity) => {
+    setSelectedEntities(prev => {
+      const isSelected = prev.some(e => e.id === entity.id);
+      if (isSelected) {
+        return prev.filter(e => e.id !== entity.id);
+      } else {
+        return [...prev, entity];
+      }
+    });
+  };
   const formatMentions = (count) => {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return count.toString();
@@ -38,26 +58,108 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
 
   return (
     <div className="bg-card border border-border rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Target className="w-5 h-5 text-primary" />
-        <h3 className="text-lg font-semibold text-foreground">Competitor Snapshot</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Competitor Snapshot</h3>
+        </div>
+        {onAddCompetitor && availableEntities.length > 0 && (
+          <button
+            onClick={() => setShowAddDialog(true)}
+            className="flex items-center gap-1 px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Competitor
+          </button>
+        )}
       </div>
 
-      {/* Competitors Row */}
-      <div className="flex items-stretch gap-4 flex-wrap relative z-0">
+      {/* Add Competitor Dialog */}
+      {showAddDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-foreground">Add Competitor</h4>
+              <button
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setSelectedEntities([]);
+                }}
+                className="p-1 hover:bg-accent rounded transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Entity List as Tags */}
+            <div className="mb-4 p-4 bg-accent/20 rounded-lg border border-border">
+              {availableEntities.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {availableEntities.map((entity) => (
+                    <button
+                      key={entity.id}
+                      onClick={() => handleSelectEntity(entity)}
+                      className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors ${
+                        selectedEntities.some(e => e.id === entity.id)
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background text-foreground border-border hover:border-primary/50 hover:bg-accent/50'
+                      }`}
+                      title={entity.description}
+                    >
+                      {entity.name}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  All entities are already added as competitors
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setSelectedEntities([]);
+                }}
+                className="flex-1 px-4 py-2 text-sm font-medium bg-accent text-foreground rounded-lg hover:bg-accent/80 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedEntities.length > 0 && onAddCompetitor) {
+                    // Pass all selected entities at once (single API call)
+                    onAddCompetitor(selectedEntities);
+                    setShowAddDialog(false);
+                    setSelectedEntities([]);
+                  }
+                }}
+                disabled={selectedEntities.length === 0}
+                className="flex-1 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add ({selectedEntities.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-0">
         {competitiveData && competitiveData.length > 0 ? (
           competitiveData.map((competitor, idx) => (
             <div 
               key={idx}
-              className="flex-1 min-w-[240px] p-4 bg-accent/30 border border-border rounded-lg hover:border-primary/50 transition-colors"
+              className="p-4 bg-accent/30 border border-border rounded-lg hover:border-primary/50 transition-colors"
             >
               {/* Competitor Name */}
-              <h4 className="text-sm font-semibold text-primary mb-4">
+              <h4 className="text-sm font-semibold text-primary mb-2">
                 {competitor.entityName}
               </h4>
 
               {/* Total Mentions */}
-              <div className="mb-4 pb-4 border-b border-border">
+              <div className="mb-2 pb-2 border-b border-border">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <MessageSquare className="w-3 h-3" />
@@ -70,9 +172,9 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
               </div>
 
               {/* Sentiment Metrics */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {/* Overall Sentiment */}
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
                     Overall Sentiment
@@ -83,7 +185,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                 </div>
 
                 {/* Positive Ratio Bar */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Zap className="w-3 h-3" />
@@ -104,7 +206,7 @@ export default function CompetitivePositioning({ competitiveData = [] }) {
                 </div>
 
                 {/* Net Sentiment Score */}
-                <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div className="flex items-center justify-between pt-1 border-t border-border">
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     Net Sentiment
                   </span>

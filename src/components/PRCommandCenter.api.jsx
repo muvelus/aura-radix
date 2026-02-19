@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LeftNavbar from './navigation/LeftNavbar';
 import EntitySelector from './navigation/EntitySelector';
@@ -13,9 +13,29 @@ import CommandPalette from './navigation/CommandPalette';
 import LoginModal from './auth/LoginModal';
 // Import API services
 import { entityService, dashboardService, analyticsService } from '../api';
+// Import utilities and hooks
+import { filterMentions } from '../utils/filterMentions';
+import { useAuth } from '../hooks/useAuth';
+
+// Constants
+const REFETCH_INTERVAL = 300000; // 5 minutes
+const ANALYTICS_REFETCH_INTERVAL = 600000; // 10 minutes
+const QUERY_STALE_TIME = 1000 * 60 * 5; // 5 minutes
+
+// View registry for conditional rendering
+const VIEW_REGISTRY = {
+  dashboard: DashboardView,
+  analytics: AnalyticsView,
+  'ai-analytics': AIAnalyticsView,
+  'crisis-center': CrisisFocusView,
+  'crisis-management': CrisisManagementCenter,
+  'negative-analysis': NegativeCommentSummary,
+  metrics: EnhancedMetricsDashboard,
+};
 
 export default function PRCommandCenter() {
   const queryClient = useQueryClient();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [selectedMention, setSelectedMention] = useState(null);
   const [activeView, setActiveView] = useState('dashboard');
   const [entityType, setEntityType] = useState('movie');
@@ -29,22 +49,19 @@ export default function PRCommandCenter() {
   const [timeRange, setTimeRange] = useState('60m');
   const [competitors, setCompetitors] = useState([]);
   const [dateRange, setDateRange] = useState('DAY');
-  const [hasLoadedEntities, setHasLoadedEntities] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('jwtToken'));
 
   // Fetch all entities based on type
   const { data: entities = [], isLoading: entitiesLoading } = useQuery({
     queryKey: ['entities', entityType],
     queryFn: () => entityService.getAll(entityType),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!localStorage.getItem('jwtToken'), // Check localStorage directly
+    staleTime: QUERY_STALE_TIME,
+    enabled: isAuthenticated,
   });
 
   // Set default entity when entities load
   useEffect(() => {
     if (entities.length > 0 && !selectedEntity) {
       setSelectedEntity(entities[0]);
-      setHasLoadedEntities(true);
     }
   }, [entities, selectedEntity]);
 
@@ -55,8 +72,8 @@ export default function PRCommandCenter() {
       dashboardService.getMentions(entityType, selectedEntity?.id, {
         timeRange: selectedTimeRange,
       }),
-    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
-    refetchInterval: 300000, // 5 minutes
+    enabled: isAuthenticated && !!selectedEntity?.id,
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   // Extract mentions array from response (backend returns paginated { content: [...] })
@@ -67,8 +84,8 @@ export default function PRCommandCenter() {
     queryKey: ['stats', selectedEntity?.id, entityType, dateRange],
     queryFn: () =>
       dashboardService.getStats(entityType, selectedEntity?.id, dateRange),
-    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
-    refetchInterval: 300000,
+    enabled: isAuthenticated && !!selectedEntity?.id,
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   // Fetch sentiment trend data
@@ -78,8 +95,8 @@ export default function PRCommandCenter() {
       // dateRange is already in API format (DAY, WEEK, MONTH)
       return dashboardService.getSentimentOverTime(entityType, selectedEntity?.id, dateRange);
     },
-    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
-    refetchInterval: 300000,
+    enabled: isAuthenticated && !!selectedEntity?.id,
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   // Transform sentiment trend data for chart
@@ -103,8 +120,8 @@ export default function PRCommandCenter() {
     queryKey: ['platform-mentions', selectedEntity?.id, entityType, dateRange],
     queryFn: () =>
       dashboardService.getPlatformMentions(entityType, selectedEntity?.id, dateRange),
-    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
-    refetchInterval: 300000,
+    enabled: isAuthenticated && !!selectedEntity?.id,
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   // Fetch competitive data
@@ -112,8 +129,8 @@ export default function PRCommandCenter() {
     queryKey: ['competitive-snapshot', selectedEntity?.id, entityType],
     queryFn: () =>
       dashboardService.getCompetitorSnapshot(entityType, selectedEntity?.id),
-    enabled: !!localStorage.getItem('jwtToken') && !!selectedEntity?.id,
-    refetchInterval: 300000,
+    enabled: isAuthenticated && !!selectedEntity?.id,
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   // Fetch analytics data
@@ -131,49 +148,69 @@ export default function PRCommandCenter() {
       }
       return {};
     },
-    enabled: !!localStorage.getItem('jwtToken'),
-    refetchInterval: 600000, // 10 minutes
+    enabled: isAuthenticated,
+    refetchInterval: ANALYTICS_REFETCH_INTERVAL,
   });
 
-  // Filter mentions by platform, sentiment, and status
-  let filteredMentions = mentions;
+  // Memoize filtered mentions
+  const filteredMentions = useMemo(
+    () => filterMentions(mentions, { 
+      platforms: selectedPlatforms, 
+      sentiments: selectedSentiments, 
+      statuses: selectedStatuses 
+    }),
+    [mentions, selectedPlatforms, selectedSentiments, selectedStatuses]
+  );
 
-  if (selectedPlatforms.length > 0) {
-    filteredMentions = filteredMentions.filter(m =>
-      selectedPlatforms.includes(m.platform)
-    );
-  }
+  // Memoize query invalidation callback
+  const handleFetchData = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['entities'] });
+    queryClient.invalidateQueries({ queryKey: ['mentions'] });
+    queryClient.invalidateQueries({ queryKey: ['stats'] });
+    queryClient.invalidateQueries({ queryKey: ['sentiment-trend'] });
+    queryClient.invalidateQueries({ queryKey: ['platform-mentions'] });
+    queryClient.invalidateQueries({ queryKey: ['competitive-snapshot'] });
+    queryClient.invalidateQueries({ queryKey: ['analytics'] });
+  }, [queryClient]);
 
-  if (selectedSentiments.length > 0) {
-    filteredMentions = filteredMentions.filter(m =>
-      selectedSentiments.includes(m.aiSentiment)
-    );
-  }
+  // Handle adding competitors (accepts array of entities)
+  const handleAddCompetitor = useCallback(async (entitiesToAdd) => {
+    try {
+      // Ensure entitiesToAdd is an array
+      const entities = Array.isArray(entitiesToAdd) ? entitiesToAdd : [entitiesToAdd];
+      
+      // Extract existing competitor IDs from competitiveData array
+      // competitiveData is an array: [mainEntity, competitor1, competitor2, ...]
+      // We exclude the first item (main entity) and get IDs of competitors
+      const competitorIds = competitiveData
+        .slice(1) // Skip the main entity (first item)
+        .map(c => c.id)
+        .filter(id => id !== undefined && id !== null);
+      
+      // Add all new competitor IDs
+      const newCompetitorIds = entities.map(e => e.id).filter(id => id !== undefined && id !== null);
+      const updatedCompetitorIds = [...competitorIds, ...newCompetitorIds];
+      
+      // Make a SINGLE API call with all competitor IDs
+      await entityService.updateCompetitors(entityType, selectedEntity.id, updatedCompetitorIds);
+      
+      // Invalidate the competitive snapshot query to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ['competitive-snapshot', selectedEntity?.id, entityType] });
+    } catch (error) {
+      console.error('Error adding competitors:', error);
+    }
+  }, [queryClient, entityType, selectedEntity?.id, competitiveData]);
 
-  if (selectedStatuses.length > 0) {
-    filteredMentions = filteredMentions.filter(m => {
-      const status = m.aiThreatScore > 70 ? 'pending' :
-        m.aiThreatScore > 40 ? 'replied' : 'no-reply';
-      return selectedStatuses.includes(status);
-    });
-  }
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandOpen(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const anomalyCount = mentions.filter(m => m.isAnomaly).length;
+  // Derived state: hasLoadedEntities
+  const hasLoadedEntities = entities.length > 0 && !entitiesLoading;
   const isLoadingEntities = entitiesLoading && !hasLoadedEntities;
   const isLoading = (mentionsLoading || metricsLoading) && hasLoadedEntities;
+
+  // Handle entity type change
+  const handleEntityTypeChange = useCallback((newType) => {
+    setEntityType(newType);
+    setSelectedEntity(null);
+  }, []);
 
   return (
     <div className="h-screen flex bg-background text-foreground">
@@ -202,7 +239,7 @@ export default function PRCommandCenter() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setEntityType('movie')}
+              onClick={() => handleEntityTypeChange('movie')}
               className={`px-4 py-2 h-10 text-sm font-medium rounded-lg transition-colors ${
                 entityType === 'movie'
                   ? 'bg-primary text-primary-foreground'
@@ -212,10 +249,7 @@ export default function PRCommandCenter() {
               Movies
             </button>
             <button
-              onClick={() => {
-                setEntityType('celebrity');
-                setSelectedEntity(null);
-              }}
+              onClick={() => handleEntityTypeChange('celebrity')}
               className={`px-4 py-2 h-10 text-sm font-medium rounded-lg transition-colors ${
                 entityType === 'celebrity'
                   ? 'bg-primary text-primary-foreground'
@@ -233,16 +267,7 @@ export default function PRCommandCenter() {
             </button>
             {isAuthenticated && (
               <button
-                onClick={() => {
-                  // Manually trigger all data fetches
-                  queryClient.invalidateQueries({ queryKey: ['entities'] });
-                  queryClient.invalidateQueries({ queryKey: ['mentions'] });
-                  queryClient.invalidateQueries({ queryKey: ['stats'] });
-                  queryClient.invalidateQueries({ queryKey: ['sentiment-trend'] });
-                  queryClient.invalidateQueries({ queryKey: ['platform-mentions'] });
-                  queryClient.invalidateQueries({ queryKey: ['competitive-snapshot'] });
-                  queryClient.invalidateQueries({ queryKey: ['analytics'] });
-                }}
+                onClick={handleFetchData}
                 className="px-4 py-2 h-10 text-sm font-medium rounded-lg bg-green-600 text-white hover:opacity-90 transition-colors"
               >
                 Fetch Data
@@ -298,81 +323,75 @@ export default function PRCommandCenter() {
           </div>
         )}
 
-        {/* Dashboard View */}
-        {isAuthenticated && !isLoading && activeView === 'dashboard' && selectedEntity && (
-          <DashboardView
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            competitiveData={competitiveData}
-            mentions={filteredMentions}
-            platformData={platformData}
-            stats={metricsData}
-            sentimentData={sentimentTrend}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            onMentionSelect={setSelectedMention}
-            onRefresh={refetchMentions}
-          />
-        )}
-
-        {/* Analytics View */}
-        {isAuthenticated && !isLoading && activeView === 'analytics' && selectedEntity && (
-          <AnalyticsView
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            mentions={filteredMentions}
-            sentimentData={sentimentTrend}
-            platformData={platformData}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-          />
-        )}
-
-        {/* AI Analytics */}
-        {isAuthenticated && !isLoading && activeView === 'ai-analytics' && selectedEntity && (
-          <AIAnalyticsView
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            analyticsData={analyticsData}
-          />
-        )}
-
-        {/* Crisis Center */}
-        {isAuthenticated && !isLoading && activeView === 'crisis-center' && selectedEntity && (
-          <CrisisFocusView
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            mentions={filteredMentions}
-            onMentionSelect={setSelectedMention}
-          />
-        )}
-
-        {/* Crisis Management Center */}
-        {isAuthenticated && !isLoading && activeView === 'crisis-management' && selectedEntity && (
-          <CrisisManagementCenter
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            mentions={filteredMentions}
-          />
-        )}
-
-        {/* Negative Analysis */}
-        {isAuthenticated && !isLoading && activeView === 'negative-analysis' && selectedEntity && (
-          <NegativeCommentSummary
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            mentions={filteredMentions}
-          />
-        )}
-
-        {/* Metrics Dashboard */}
-        {isAuthenticated && !isLoading && activeView === 'metrics' && selectedEntity && (
-          <EnhancedMetricsDashboard
-            selectedEntity={selectedEntity}
-            entityType={entityType}
-            stats={metricsData}
-            mentions={filteredMentions}
-          />
+        {/* Views Router */}
+        {isAuthenticated && !isLoading && selectedEntity && (
+          <>
+            {activeView === 'dashboard' && (
+              <DashboardView
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                competitiveData={competitiveData}
+                entities={entities}
+                onAddCompetitor={handleAddCompetitor}
+                mentions={filteredMentions}
+                platformData={platformData}
+                stats={metricsData}
+                sentimentData={sentimentTrend}
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                onMentionSelect={setSelectedMention}
+                onRefresh={refetchMentions}
+              />
+            )}
+            {activeView === 'analytics' && (
+              <AnalyticsView
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                mentions={filteredMentions}
+                sentimentData={sentimentTrend}
+                platformData={platformData}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+              />
+            )}
+            {activeView === 'ai-analytics' && (
+              <AIAnalyticsView
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                analyticsData={analyticsData}
+              />
+            )}
+            {activeView === 'crisis-center' && (
+              <CrisisFocusView
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                mentions={filteredMentions}
+                onMentionSelect={setSelectedMention}
+              />
+            )}
+            {activeView === 'crisis-management' && (
+              <CrisisManagementCenter
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                mentions={filteredMentions}
+              />
+            )}
+            {activeView === 'negative-analysis' && (
+              <NegativeCommentSummary
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                mentions={filteredMentions}
+              />
+            )}
+            {activeView === 'metrics' && (
+              <EnhancedMetricsDashboard
+                selectedEntity={selectedEntity}
+                entityType={entityType}
+                stats={metricsData}
+                mentions={filteredMentions}
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -395,13 +414,7 @@ export default function PRCommandCenter() {
           
           // Invalidate all queries to trigger fresh fetches with JWT token
           setTimeout(() => {
-            queryClient.invalidateQueries({ queryKey: ['entities'] });
-            queryClient.invalidateQueries({ queryKey: ['mentions'] });
-            queryClient.invalidateQueries({ queryKey: ['stats'] });
-            queryClient.invalidateQueries({ queryKey: ['sentiment-trend'] });
-            queryClient.invalidateQueries({ queryKey: ['platform-mentions'] });
-            queryClient.invalidateQueries({ queryKey: ['competitive-snapshot'] });
-            queryClient.invalidateQueries({ queryKey: ['analytics'] });
+            handleFetchData();
           }, 100); // Small delay to ensure localStorage is synced
         }}
       />

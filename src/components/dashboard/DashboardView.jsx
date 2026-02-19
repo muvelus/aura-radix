@@ -19,6 +19,8 @@ import TimeRangeSelector from "../navigation/TimeRangeSelector";
  * @param {Object} selectedEntity - The currently selected entity (celebrity or movie)
  * @param {string} entityType - Type of entity: 'celebrity' or 'movie'
  * @param {Object} competitiveData - Competitive positioning data for the entity
+ * @param {Array} entities - List of available entities for adding competitors
+ * @param {Function} onAddCompetitor - Callback when adding a new competitor
  * @param {Array} mentions - Array of social media mentions/posts
  * @param {Object} platformData - Platform-specific sentiment breakdown (platform -> {POSITIVE, NEGATIVE, NEUTRAL})
  * @param {Object} stats - Pre-calculated statistics for KPI cards
@@ -32,6 +34,8 @@ export default function DashboardView({
   selectedEntity,
   entityType,
   competitiveData,
+  entities,
+  onAddCompetitor,
   mentions,
   platformData,
   stats,
@@ -330,7 +334,11 @@ export default function DashboardView({
         {/* Left: Competitive positioning analysis | Right: Platform sentiment breakdown */}
         <div className="grid grid-cols-2 gap-6">
           {/* Competitive Positioning Chart - Compares entity performance vs competitors */}
-          <CompetitivePositioning competitiveData={competitiveData} />
+          <CompetitivePositioning 
+            competitiveData={competitiveData} 
+            entities={entities}
+            onAddCompetitor={onAddCompetitor}
+          />
           {/* Platform Breakdown Chart - Stacked bar chart showing sentiment distribution per platform */}
           <PlatformBreakdownChart platformData={platformData} />
         </div>

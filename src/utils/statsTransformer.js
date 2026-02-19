@@ -50,7 +50,7 @@ export function transformStatsToCards(statsResponse) {
             : "orange",
       tooltip:
         "Net sentiment score indicates that there are " +
-        netSentimentScore +
+        netSentimentScore.toFixed(2) +
         " positive posts for one negative post. Higher is better.",
     },
   ];
