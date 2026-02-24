@@ -15,6 +15,8 @@ export default function AnalyticsView({ mentions, metricsData, selectedEntity, e
   
   const dateRangeOptions = [
     { value: 'DAY', label: 'Daily', days: 7, apiParam: 'DAY' },
+    { value: 'DAY15', label: '2 Weeks', days: 7, apiParam: 'DAY15' },
+    { value: 'DAY30', label: '30 Days', days: 7, apiParam: 'DAY30' },
     { value: 'WEEK', label: 'Weekly', days: 14, apiParam: 'WEEK' },
     { value: 'MONTH', label: 'Monthly', days: 28, apiParam: 'MONTH' }
   ];
