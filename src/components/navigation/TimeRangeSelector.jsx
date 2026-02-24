@@ -15,11 +15,11 @@ export default function TimeRangeSelector({
   onSentimentDataFetched,
 }) {
   const dateRangeOptions = [
-    { value: "DAY", label: "Past 24h", days: 7, apiParam: "DAY" },
-    { value: "DAY15", label: "Past 15 Days", days: 7, apiParam: "DAY15" },
-    { value: "DAY30", label: "Past 30 Days", days: 7, apiParam: "DAY30" },
-    { value: "WEEK", label: "Consolidated Weekly", days: 14, apiParam: "WEEK" },
-    { value: "MONTH", label: "Consolidated Monthly", days: 28, apiParam: "MONTH" },
+    { value: "DAY", label: "Past 7 Days", days: 7, apiParam: "DAY" },
+    { value: "DAY15", label: "Past 15 Days", days: 15, apiParam: "DAY15" },
+    { value: "DAY30", label: "Past 30 Days", days: 30, apiParam: "DAY30" },
+    // { value: "WEEK", label: "Consolidated Weekly", days: 14, apiParam: "WEEK" },
+    // { value: "MONTH", label: "Consolidated Monthly", days: 28, apiParam: "MONTH" },
   ];
 
   // Debug: Log component mount and dateRange changes
