@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Calendar, Award, Film, DollarSign, Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { dashboardService } from '../../api/dashboardService';
 import { analyticsService } from '../../api/analyticsService';
+import MarketVerdictCard from './MarketVerdictCard';
+import PredictionMetadataCard from './PredictionMetadataCard';
+import FinancialProjectionsSection from './FinancialProjectionsSection';
+import StrategicFitCard from './StrategicFitCard';
 
 export default function AIAnalyticsView({ selectedEntity, entityType }) {
   const [boxOfficePrediction, setBoxOfficePrediction] = useState(null);
@@ -67,107 +71,33 @@ export default function AIAnalyticsView({ selectedEntity, entityType }) {
   const pred = boxOfficePrediction.predictedBoxOffice;
 
   return (
-    <div className="h-full overflow-y-auto bg-background">
+    <div className="h-full overflow-y-auto bg-slate-950">
       {/* Header */}
-      <div className="border-b border-border bg-card px-6 py-6">
+      <div className="border-b border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-5">
         <div className="flex items-center gap-3 mb-2">
-          <Sparkles className="w-6 h-6 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">
-            Box Office Prediction for <span className="text-primary">{selectedEntity?.name || selectedEntity?.title}</span>
+          <Sparkles className="w-7 h-7 text-amber-400" />
+          <h2 className="text-3xl font-bold text-white">
+            Box Office Prediction for <span className="text-amber-400">{selectedEntity?.name || selectedEntity?.title}</span>
           </h2>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-slate-400">
           AI-powered analysis based on historical data, sentiment, and market trends
         </p>
       </div>
 
       {/* Content */}
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-5">
         {/* Market Verdict Card */}
-        {/* <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-foreground">Market Verdict</h3>
-            <span className="px-6 py-3 bg-emerald-500/20 text-emerald-400 rounded-lg font-bold text-xl">
-              {pred.market_verdict || 'N/A'}
-            </span>
-          </div>
-        </div> */}
+        {/* <MarketVerdictCard verdict={boxOfficePrediction?.predictedBoxOffice?.market_verdict} /> */}
 
         {/* Prediction Metadata */}
-        {pred.prediction_metadata && (
-          <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Identified Period</p>
-              <p className="text-lg font-medium text-foreground">{pred.prediction_metadata.identified_period || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Analysis Logic</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{pred.prediction_metadata.analysis_logic || 'N/A'}</p>
-            </div>
-          </div>
-        )}
+        <PredictionMetadataCard metadata={pred.prediction_metadata} />
 
         {/* Financial Projections Grid */}
-        {pred.financial_projections && (
-          <div>
-            <h3 className="text-lg font-bold text-foreground mb-4">Financial Projections</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Opening Day */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Opening Day Collection</p>
-                <p className="text-3xl font-bold text-primary mb-2">
-                  {pred.financial_projections.opening_day_collection?.estimated_range || 'N/A'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Confidence: {pred.financial_projections.opening_day_collection?.confidence_level || 'N/A'}
-                </p>
-              </div>
-
-              {/* Weekend Gross */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Weekend Gross Cumulative</p>
-                <p className="text-3xl font-bold text-primary">
-                  {pred.financial_projections.average_weekend_gross_cumulative || 'N/A'}
-                </p>
-              </div>
-
-              {/* Worldwide Gross */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Worldwide Gross Total</p>
-                <p className="text-3xl font-bold text-primary">
-                  {pred.financial_projections.mean_worldwide_gross_total || 'N/A'}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        <FinancialProjectionsSection projections={pred.financial_projections} />
 
         {/* Strategic Fit */}
-        {pred.strategic_fit && (
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-bold text-foreground mb-4">Strategic Fit</h3>
-            
-            <div className="mb-6">
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Optimal Genre</p>
-              <p className="text-lg font-semibold text-primary">{pred.strategic_fit.optimal_genre || 'N/A'}</p>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Key Success Factors</p>
-              <div className="flex flex-wrap gap-2">
-                {pred.strategic_fit.key_success_factors && pred.strategic_fit.key_success_factors.length > 0 ? (
-                  pred.strategic_fit.key_success_factors.map((factor, idx) => (
-                    <span key={idx} className="px-4 py-2 bg-primary/20 text-primary rounded-full text-sm font-semibold">
-                      {factor}
-                    </span>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground">No factors available</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <StrategicFitCard strategicFit={pred.strategic_fit} />
       </div>
     </div>
   );
